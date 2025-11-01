@@ -1,0 +1,2075 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LexControl</title>
+<style>
+  body {
+    margin: 0;
+    font-family: 'Montserrat', sans-serif;
+    background-color: #f0f2f5; /* Light institutional background */
+    position: relative; /* Needed for pseudo-element positioning */
+    overflow-x: hidden; /* Hide horizontal overflow */
+    min-height: 100vh;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; /* Fixed so it doesn't scroll with content */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('logo.png');
+    background-size: contain; /* Standard size, maintain proportion */
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0.1; /* Low opacity for watermark effect */
+    filter: grayscale(100%); /* Soft, translucent filter */
+    z-index: -1; /* Ensure it's behind all content */
+  }
+
+  /* ===== LOGIN ===== */
+  .login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: transparent; /* Make login container background transparent */
+    position: relative; /* Needed for z-index of login-box */
+    z-index: 1; /* Ensure login box is above body watermark */
+  }
+
+  .login-box {
+    background-color: white;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    width: 340px;
+    text-align: center;
+    position: relative; /* Ensure login box is above the watermark */
+    z-index: 2; /* Ensure login box is above the watermark */
+  }
+
+  .login-container::before {
+    content: none; /* Remove pseudo-element from login container */
+  }
+  /* box-sizing global para evitar overflow inesperado */
+  * { box-sizing: border-box; }
+
+  /* Centrar y adaptar contenedores de registro/recuperación
+     para que los formularios largos no queden cortados en pantallas pequeñas */
+  .register-container {
+    display: none; /* por defecto oculto, se muestra con inline styles desde JS */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    background: rgba(30,58,95,0.85); /* semitransparente para ver contexto */
+  }
+
+  .register-container .login-box {
+    width: 420px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 20px;
+    margin: 0 auto;
+    background: #fff;
+  }
+
+  @media (max-width: 480px) {
+    .register-container .login-box {
+      width: 100%;
+      max-height: 95vh;
+      padding: 16px;
+      border-radius: 8px;
+    }
+    .login-box { padding: 16px; }
+  }
+
+  .login-box h2 {
+    margin-bottom: 20px;
+    color: #1E3A5F;
+  }
+
+  .login-box input {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+  }
+
+  .login-box button {
+    background-color: #2E5077;
+    color: white;
+    border: none;
+    padding: 10px;
+    width: 100%;
+    border-radius: 6px;
+    margin-top: 10px;
+    cursor: pointer;
+  }
+
+  .login-box button:hover {
+    background-color: #1E3A5F;
+  }
+
+  /* ===== DASHBOARD ===== */
+  body {
+    margin: 0;
+    font-family: 'Montserrat', sans-serif;
+    background-color: #f4f6f8;
+  }
+
+  /* ===== DASHBOARD ===== */
+  .dashboard {
+    display: grid;
+    grid-template-columns: 250px 1fr; /* Sidebar fixed width, main content takes rest */
+    height: 100vh; /* Full viewport height */
+  }
+
+  .main-content-wrapper {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* Hide overflow from content */
+  }
+
+  .top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end; /* Align content to the right */
+    padding: 10px 20px;
+    background-color: #fff;
+    border-bottom: 1px solid #eee;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    z-index: 100; /* Ensure it stays on top */
+  }
+
+  .top-bar input {
+    width: 250px; /* Set a fixed width for the input */
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    margin-right: 10px;
+  }
+
+  .top-bar button {
+    background-color: #2E5077;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+
+  .top-bar button:hover {
+    background-color: #1E3A5F;
+  }
+
+  .sidebar {
+    width: 250px;
+    background-color: #1E3A5F;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    overflow-y: auto; /* Allow sidebar to scroll if content is long */
+  }
+
+  .content {
+    flex-grow: 1;
+    padding: 30px;
+    background-color: #f4f6f8;
+    overflow-y: auto;
+  }
+
+  .logo-section {
+    display: flex;
+    align-items: center;
+    margin-bottom: 40px;
+    cursor: pointer;
+  }
+
+  .logo-section img {
+    width: 50px;
+    height: 50px;
+    margin-right: 10px;
+  }
+
+  .logo-section h1 {
+    font-size: 20px;
+    font-weight: 600;
+  }
+
+  .menu-item {
+    margin-bottom: 20px;
+  }
+
+  .menu-item button {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    text-align: left;
+    width: 100%;
+    padding: 10px 0;
+    padding-left: 8px;
+    transition: background-color 150ms ease, padding-left 150ms ease;
+  }
+
+  /* Hover en items del sidebar: un azul ligeramente más claro */
+  .sidebar .menu-item button:hover {
+    background-color: #2E5077; /* azul más claro respecto a #1E3A5F */
+    padding-left: 12px;
+    border-radius: 6px;
+  }
+
+  .sidebar .submenu button:hover {
+    background-color: rgba(255,255,255,0.08);
+    border-radius: 6px;
+  }
+
+  .submenu {
+    display: none;
+    margin-left: 15px;
+  }
+
+  .submenu button {
+    font-size: 14px;
+  }
+
+  .content {
+    flex-grow: 1;
+    padding: 30px;
+    background-color: #f4f6f8;
+    overflow-y: auto;
+  }
+
+  /* ===== FORMULARIOS ===== */
+  .formulario {
+    max-width: 800px;
+    margin: 0 auto;
+    background: transparent; /* Make background transparent */
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: none; /* Remove shadow if background is transparent */
+  }
+
+  h2 {
+    text-align: center;
+    color: #1E3A5F;
+  }
+
+  .form-section {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-top: 20px;
+  }
+
+  label {
+    font-weight: 600;
+    color: #333;
+  }
+
+  input, select, textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+  }
+
+  input[readonly] {
+    background-color: #f0f0f0;
+  }
+
+  .form-buttons {
+    text-align: center;
+    margin-top: 20px;
+  }
+
+  .form-buttons button {
+    background-color: #2E5077;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  .form-buttons button:hover {
+    background-color: #1E3A5F;
+  }
+
+  .btn-accion {
+    background-color: #2E5077;
+    color: white;
+    padding: 3px 6px; /* Smaller padding */
+    border: none;
+    border-radius: 4px; /* Slightly smaller border-radius */
+    cursor: pointer;
+    display: inline-block; /* Ensure they are side-by-side */
+    margin: 0 2px; /* Small margin between buttons */
+    font-size: 12px; /* Smaller font size for icons */
+  }
+
+  .status-select {
+    padding: 5px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    margin-left: 5px;
+    background-color: #f9f9f9;
+    cursor: pointer;
+  }
+
+  .status-select:hover {
+    border-color: #2E5077;
+  }
+
+  .report-menu {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+    justify-content: center;
+  }
+
+  .report-menu button {
+    background-color: #2E5077;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+  }
+
+  .report-menu button:hover {
+    background-color: #1E3A5F;
+  }
+
+  #report-content {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+    text-align: left;
+  }
+
+  #report-content h3 {
+    color: #1E3A5F;
+    margin-bottom: 15px;
+  }
+
+  #report-content p {
+    margin-bottom: 8px;
+    font-size: 15px;
+  }
+
+  .progress {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+
+  .progress span {
+    color: #1E3A5F;
+    font-weight: bold;
+    margin-right: 10px;
+  }
+
+  .circle {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background-color: lightgray;
+    margin: 0 5px;
+  }
+
+  .circle.active {
+    background-color: #1E3A5F;
+  }
+
+  .frost-particle {
+    position: absolute;
+    background-color: rgba(255, 255, 255, 0.7);
+    border-radius: 50%;
+    pointer-events: none;
+    animation: fadeOut 1s forwards;
+    filter: blur(2px);
+    z-index: 1000;
+  }
+
+  @keyframes fadeOut {
+    from { opacity: 1; transform: scale(1); }
+    to { opacity: 0; transform: scale(2); }
+  }
+
+  /* Custom Cursor Effect */
+  .custom-cursor {
+    position: fixed;
+    width: 30px;
+    height: 30px;
+    background-color: rgba(54, 162, 235, 0.4); /* Soft blue glow */
+    border-radius: 50%;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    transition: transform 0.1s ease-out, opacity 0.1s ease-out;
+    z-index: 9999;
+    opacity: 0; /* Hidden by default */
+    filter: blur(8px); /* Soft glow effect */
+  }
+
+  .custom-cursor.active {
+    opacity: 1;
+  }
+</style>
+</head>
+<body>
+
+<!-- Custom Cursor -->
+<div class="custom-cursor" id="customCursor"></div>
+
+<!-- ===== LOGIN ===== -->
+<div class="login-container" id="login">
+  <div class="login-box">
+    <h2>LexControl</h2>
+    <input type="text" placeholder="Usuario" id="usuario">
+    <input type="password" placeholder="Contraseña" id="password">
+    <button type="button" onclick="login()">Iniciar sesión</button>
+    <button type="button" onclick="mostrarRecuperacion()">Recuperar contraseña</button>
+  </div>
+</div>
+<!-- ===== RECUPERACIÓN (reutilizable) ===== -->
+<!-- ===== RECUPERACIÓN (reutilizable) ===== -->
+<div class="register-container" id="register" style="display: none;">
+  <div class="login-box" id="recoverBox">
+    <h2>Recuperar contraseña</h2>
+    <p>Ingrese su número de teléfono para recibir un código SMS y recuperar su contraseña.</p>
+    <input type="tel" id="telefonoRecuperacion" placeholder="Teléfono (ej. 3207096897)">
+    <button type="button" onclick="enviarCodigo()">Enviar código por SMS</button>
+    <button type="button" onclick="mostrarLogin()">Volver al inicio de sesión</button>
+  </div>
+</div>
+
+<!-- (Se elimina el formulario avanzado de registro; usamos el simple en #register) -->
+
+<!-- ===== DASHBOARD ===== -->
+<div class="dashboard" id="dashboard">
+  <div class="sidebar">
+    <div class="logo-section" onclick="volverInicio()">
+      <img src="logo.png" alt="LexControl Logo">
+      <h1>LexControl</h1>
+    </div>
+
+    <div class="menu-item">
+      <button onclick="toggleSubmenu()">Procesos</button>
+      <div class="submenu" id="submenu">
+        <button onclick="mostrarResumenProcesos()">Resumen de Procesos</button>
+        <button onclick="mostrarFormulario1()">Crear nuevo proceso</button>
+      </div>
+    </div>
+
+    <div class="menu-item">
+      <button onclick="toggleSubmenuUsuario()">Usuario</button>
+      <div class="submenu" id="submenuUsuario">
+        <button onclick="mostrarUsuario()">Usuarios registrados</button>
+        <button onclick="mostrarRegistro()">Crear nuevo usuario</button>
+      </div>
+    </div>
+
+    <div class="menu-item">
+      <button onclick="toggleSubmenuReportes()">Reportes</button>
+      <div class="submenu" id="submenuReportes">
+        <button onclick="mostrarReporteActivosFinalizados()">Reporte Procesos Activos vs Finalizados</button>
+        <button onclick="mostrarReportePorTipo()">Reporte Procesos por Tipo</button>
+        <button onclick="mostrarReportePorResponsable()">Reporte Procesos por Responsable</button>
+        <button onclick="mostrarReportePorMes()">Reporte Procesos Registrados por Mes</button>
+      </div>
+    </div>
+
+    <div class="menu-item" style="margin-top: auto;">
+      <button onclick="cerrarSesion()">Cerrar sesión</button>
+    </div>
+  </div>
+
+  <div class="main-content-wrapper">
+    <div class="top-bar">
+      <input type="text" id="globalSearchInput" placeholder="Buscar por radicado, demandado o demandante...">
+      <button onclick="aplicarBusquedaGlobal()" title="Buscar">🔍</button>
+    </div>
+    <div class="content" id="content">
+      <h2>Bienvenido a LexControl</h2>
+      <p>Seleccione una opción del menú para comenzar.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+let procesos = 0;
+let currentProceso = {};
+let listaProcesos = [
+  {
+    id: 1,
+    secretaria: "SECRETARÍA JURÍDICA",
+    calidad: "demandante",
+    radicado: "12345-2023",
+    demandante: "Juan Pérez",
+    demandado: "Empresa XYZ",
+    cedula: "123456789",
+    fechaNotificacion: "2023-01-15",
+    jurisdiccion: "civil",
+    accionJudicial: "Proceso Civil",
+    corporacion: "Juzgados Civiles del Circuito",
+    despachoJudicial: "Juzgado 1 Civil del Circuito de Pereira",
+    dependenciaResponsable: "Oficina Jurídica",
+    apoderado: "Lauren Cantor",
+    telefono: "3207096897",
+    correo: "lauren.cantorg@gmail.com",
+    sintesis: "Demanda por incumplimiento de contrato.",
+    hechoGenerador: "Incumplimiento de contrato",
+    tipoPretensiones: "determinadas",
+    valorMedidaCautelar: 10000000,
+    medidaCautelar: "sí",
+    valorCautelar: "10000000",
+    fortalezaDefensa: "Alto",
+    fortalezaProbatoria: "Medio Alto",
+    riesgosProcesales: "Bajo",
+    nivelJurisprudencial: "Alto",
+    fechaFallo: "2025-06-01",
+    estado: "En trámite",
+  },
+  {
+    id: 2,
+    secretaria: "SECRETARÍA DE EDUCACIÓN",
+    calidad: "demandado",
+    radicado: "67890-2024",
+    demandante: "María García",
+    demandado: "Gobierno Local",
+    cedula: "987654321",
+    fechaNotificacion: "2024-02-20",
+    jurisdiccion: "laboral",
+    accionJudicial: "Proceso ordinario laboral",
+    corporacion: "Juzgados Laborales del Circuito",
+    despachoJudicial: "Juzgado 2 Laboral del Circuito de Pereira",
+    dependenciaResponsable: "Secretaría de Educación",
+    apoderado: "Carlos Gomez",
+    telefono: "3101234567",
+    correo: "carlos.gomez@example.com",
+    sintesis: "Demanda por despido injustificado.",
+    hechoGenerador: "Despido sin justa causa",
+    tipoPretensiones: "indeterminadas",
+    valorMedidaCautelar: 0,
+    medidaCautelar: "no",
+    valorCautelar: "N/A",
+    fortalezaDefensa: "Medio",
+    fortalezaProbatoria: "Bajo",
+    riesgosProcesales: "Alto",
+    nivelJurisprudencial: "Medio",
+    fechaFallo: "2026-01-15",
+    estado: "Archivado",
+  },
+  {
+    id: 3,
+    secretaria: "SECRETARÍA DE HACIENDA",
+    calidad: "demandante",
+    radicado: "11223-2023",
+    demandante: "Pedro López",
+    demandado: "Banco ABC",
+    cedula: "111222333",
+    fechaNotificacion: "2023-03-10",
+    jurisdiccion: "civil",
+    accionJudicial: "Proceso ejecutivo",
+    corporacion: "Juzgados Civiles Municipales",
+    despachoJudicial: "Juzgado 1 Civil Municipal de Dosquebradas",
+    dependenciaResponsable: "Oficina de Cobro Coactivo",
+    apoderado: "Ana Rodriguez",
+    telefono: "3009876543",
+    correo: "ana.rodriguez@example.com",
+    sintesis: "Cobro de título valor.",
+    hechoGenerador: "Incumplimiento de pago",
+    tipoPretensiones: "determinadas",
+    valorMedidaCautelar: 5000000,
+    medidaCautelar: "sí",
+    valorCautelar: "5000000",
+    fortalezaDefensa: "Alto",
+    fortalezaProbatoria: "Alto",
+    riesgosProcesales: "Bajo",
+    nivelJurisprudencial: "Bajo",
+    fechaFallo: "2024-12-01",
+    estado: "Pendiente",
+  },
+  {
+    id: 4,
+    secretaria: "SECRETARÍA JURÍDICA",
+    calidad: "demandado",
+    radicado: "98765-2023",
+    demandante: "Carlos Ruiz",
+    demandado: "Gobernación de Risaralda",
+    cedula: "444555666",
+    fechaNotificacion: "2023-04-25",
+    jurisdiccion: "contencioso-administrativo",
+    accionJudicial: "Acción de nulidad y restablecimiento del derecho",
+    corporacion: "Tribunal Administrativo de Risaralda",
+    despachoJudicial: "Sala Primera Administrativa",
+    dependenciaResponsable: "Oficina Jurídica",
+    apoderado: "Lauren Cantor",
+    telefono: "3207096897",
+    correo: "lauren.cantorg@gmail.com",
+    sintesis: "Demanda por acto administrativo.",
+    hechoGenerador: "Acto administrativo ilegal",
+    tipoPretensiones: "determinadas",
+    valorMedidaCautelar: 0,
+    medidaCautelar: "no",
+    valorCautelar: "N/A",
+    fortalezaDefensa: "Medio",
+    fortalezaProbatoria: "Medio",
+    riesgosProcesales: "Medio",
+    nivelJurisprudencial: "Alto",
+    fechaFallo: "2025-03-10",
+    estado: "Activo",
+  },
+  {
+    id: 5,
+    secretaria: "SECRETARÍA DE PLANEACIÓN",
+    calidad: "demandante",
+    radicado: "54321-2024",
+    demandante: "Laura Giraldo",
+    demandado: "Constructora XYZ",
+    cedula: "777888999",
+    fechaNotificacion: "2024-01-05",
+    jurisdiccion: "civil",
+    accionJudicial: "Proceso declarativo",
+    corporacion: "Juzgados Civiles del Circuito",
+    despachoJudicial: "Juzgado 3 Civil del Circuito de Pereira",
+    dependenciaResponsable: "Secretaría de Planeación",
+    apoderado: "Ana Rodriguez",
+    telefono: "3009876543",
+    correo: "ana.rodriguez@example.com",
+    sintesis: "Demanda por vicios ocultos en construcción.",
+    hechoGenerador: "Vicios ocultos",
+    tipoPretensiones: "determinadas",
+    valorMedidaCautelar: 15000000,
+    medidaCautelar: "sí",
+    valorCautelar: "15000000",
+    fortalezaDefensa: "Alto",
+    fortalezaProbatoria: "Alto",
+    riesgosProcesales: "Bajo",
+    nivelJurisprudencial: "Medio Alto",
+    fechaFallo: "2026-07-20",
+    estado: "En trámite",
+  },
+  {
+    id: 6,
+    secretaria: "SECRETARÍA DE SALUD",
+    calidad: "demandado",
+    radicado: "10293-2023",
+    demandante: "EPS Salud Total",
+    demandado: "Gobernación de Risaralda",
+    cedula: "111222333",
+    fechaNotificacion: "2023-02-10",
+    jurisdiccion: "constitucional",
+    accionJudicial: "Acción de tutela",
+    corporacion: "Juzgados Administrativos",
+    despachoJudicial: "Juzgado 1 Administrativo de Pereira",
+    dependenciaResponsable: "Secretaría de Salud",
+    apoderado: "Carlos Gomez",
+    telefono: "3101234567",
+    correo: "carlos.gomez@example.com",
+    sintesis: "Tutela por negación de servicio médico.",
+    hechoGenerador: "Negación de servicio médico",
+    tipoPretensiones: "indeterminadas",
+    valorMedidaCautelar: 0,
+    medidaCautelar: "no",
+    valorCautelar: "N/A",
+    fortalezaDefensa: "Bajo",
+    fortalezaProbatoria: "Medio",
+    riesgosProcesales: "Alto",
+    nivelJurisprudencial: "Alto",
+    fechaFallo: "2024-05-01",
+    estado: "Terminado",
+  },
+  {
+    id: 7,
+    secretaria: "SECRETARÍA JURÍDICA",
+    calidad: "demandante",
+    radicado: "65432-2024",
+    demandante: "Gobernación de Risaralda",
+    demandado: "Contratista ABC",
+    cedula: "999888777",
+    fechaNotificacion: "2024-03-18",
+    jurisdiccion: "civil",
+    accionJudicial: "Proceso ejecutivo",
+    corporacion: "Juzgados Civiles del Circuito",
+    despachoJudicial: "Juzgado 2 Civil del Circuito de Pereira",
+    dependenciaResponsable: "Oficina Jurídica",
+    apoderado: "Lauren Cantor",
+    telefono: "3207096897",
+    correo: "lauren.cantorg@gmail.com",
+    sintesis: "Cobro de multa por incumplimiento de contrato.",
+    hechoGenerador: "Incumplimiento de contrato",
+    tipoPretensiones: "determinadas",
+    valorMedidaCautelar: 8000000,
+    medidaCautelar: "sí",
+    valorCautelar: "8000000",
+    fortalezaDefensa: "Alto",
+    fortalezaProbatoria: "Alto",
+    riesgosProcesales: "Bajo",
+    nivelJurisprudencial: "Medio Alto",
+    fechaFallo: "2025-10-01",
+    estado: "Activo",
+  },
+  {
+    id: 8,
+    secretaria: "SECRETARÍA DE HACIENDA",
+    calidad: "demandado",
+    radicado: "13579-2023",
+    demandante: "Inversiones del Café",
+    demandado: "Gobernación de Risaralda",
+    cedula: "123123123",
+    fechaNotificacion: "2023-06-01",
+    jurisdiccion: "contencioso-administrativo",
+    accionJudicial: "Acción de reparación directa",
+    corporacion: "Tribunal Administrativo de Risaralda",
+    despachoJudicial: "Sala Segunda Administrativa",
+    dependenciaResponsable: "Secretaría de Hacienda",
+    apoderado: "Ana Rodriguez",
+    telefono: "3009876543",
+    correo: "ana.rodriguez@example.com",
+    sintesis: "Demanda por daños y perjuicios.",
+    hechoGenerador: "Daño antijurídico",
+    tipoPretensiones: "indeterminadas",
+    valorMedidaCautelar: 0,
+    medidaCautelar: "no",
+    valorCautelar: "N/A",
+    fortalezaDefensa: "Medio",
+    fortalezaProbatoria: "Bajo",
+    riesgosProcesales: "Alto",
+    nivelJurisprudencial: "Medio",
+    fechaFallo: "2026-03-01",
+    estado: "Archivado",
+  },
+  {
+    id: 9,
+    secretaria: "SECRETARÍA DE EDUCACIÓN",
+    calidad: "demandante",
+    radicado: "24680-2024",
+    demandante: "Ministerio de Educación",
+    demandado: "Colegio Moderno",
+    cedula: "456456456",
+    fechaNotificacion: "2024-04-10",
+    jurisdiccion: "civil",
+    accionJudicial: "Proceso declarativo",
+    corporacion: "Juzgados Civiles Municipales",
+    despachoJudicial: "Juzgado 2 Civil Municipal de Pereira",
+    dependenciaResponsable: "Secretaría de Educación",
+    apoderado: "Carlos Gomez",
+    telefono: "3101234567",
+    correo: "carlos.gomez@example.com",
+    sintesis: "Demanda por irregularidades académicas.",
+    hechoGenerador: "Irregularidades académicas",
+    tipoPretensiones: "determinadas",
+    valorMedidaCautelar: 0,
+    medidaCautelar: "no",
+    valorCautelar: "N/A",
+    fortalezaDefensa: "Alto",
+    fortalezaProbatoria: "Medio Alto",
+    riesgosProcesales: "Bajo",
+    nivelJurisprudencial: "Alto",
+    fechaFallo: "2025-11-15",
+    estado: "Activo",
+  },
+  {
+    id: 10,
+    secretaria: "SECRETARÍA JURÍDICA",
+    calidad: "demandado",
+    radicado: "11223-2024",
+    demandante: "Fernando Vargas",
+    demandado: "Gobernación de Risaralda",
+    cedula: "789789789",
+    fechaNotificacion: "2024-05-01",
+    jurisdiccion: "laboral",
+    accionJudicial: "Proceso ordinario laboral",
+    corporacion: "Juzgados Laborales del Circuito",
+    despachoJudicial: "Juzgado 1 Laboral del Circuito de Dosquebradas",
+    dependenciaResponsable: "Oficina Jurídica",
+    apoderado: "Lauren Cantor",
+    telefono: "3207096897",
+    correo: "lauren.cantorg@gmail.com",
+    sintesis: "Demanda por prestaciones sociales.",
+    hechoGenerador: "Pago de prestaciones sociales",
+    tipoPretensiones: "determinadas",
+    valorMedidaCautelar: 0,
+    medidaCautelar: "no",
+    valorCautelar: "N/A",
+    fortalezaDefensa: "Medio",
+    fortalezaProbatoria: "Medio",
+    riesgosProcesales: "Medio",
+    nivelJurisprudencial: "Medio",
+    fechaFallo: "2026-02-01",
+    estado: "Activo",
+  },
+]; // Nuevo array para almacenar los procesos
+
+const users = [
+  {
+    nombre: "Admin",
+    apellido: "User",
+    telefono: "1234567890",
+    correo: "admin@example.com",
+    tipoDocumento: "CC",
+    documento: "1000000000",
+    secretaria: "SECRETARÍA ADMINISTRATIVA",
+    contrasena: "12345",
+  },
+  {
+    nombre: "Test",
+    apellido: "User",
+    telefono: "0987654321",
+    correo: "test@example.com",
+    tipoDocumento: "CE",
+    documento: "123456789",
+    secretaria: "SECRETARÍA DE EDUCACIÓN",
+    contrasena: "password",
+  },
+]; // Mock data for users
+
+const usuarioQuemado = {
+  correo: "admin@correo.com",
+  contrasena: "12345"
+};
+
+const usuarioActivo = {
+  secretaria: "Secretaría Jurídica",
+  correo: "lauren.cantorg@gmail.com",
+  apoderado: "Lauren Cantor",
+  telefono: "3207096897"
+};
+
+// Persistencia en localStorage
+function saveState() {
+  try {
+    localStorage.setItem('lex_users', JSON.stringify(users));
+    localStorage.setItem('lex_procesos', String(procesos));
+    localStorage.setItem('lex_listaProcesos', JSON.stringify(listaProcesos));
+    localStorage.setItem('lex_usuarioQuemado', JSON.stringify(usuarioQuemado));
+    localStorage.setItem('lex_usuarioActivo', JSON.stringify(usuarioActivo));
+  } catch (e) {
+    console.warn('No se pudo guardar en localStorage:', e);
+  }
+}
+
+function loadState() {
+  try {
+    const sUsers = localStorage.getItem('lex_users');
+    if (sUsers) {
+      const parsed = JSON.parse(sUsers);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        users.splice(0, users.length, ...parsed);
+      }
+    }
+
+    const sProcesos = localStorage.getItem('lex_procesos');
+    if (sProcesos !== null) {
+      const n = parseInt(sProcesos, 10);
+      if (!isNaN(n)) procesos = n;
+    }
+
+    const sListaProcesos = localStorage.getItem('lex_listaProcesos');
+    if (sListaProcesos) {
+      const parsed = JSON.parse(sListaProcesos);
+      if (Array.isArray(parsed)) {
+        listaProcesos.splice(0, listaProcesos.length, ...parsed);
+      }
+    } else {
+      // If no data in localStorage, use the initial mock data and save it
+      saveState();
+    }
+
+    // Update procesos count based on listaProcesos length
+    procesos = listaProcesos.length;
+
+    const sUq = localStorage.getItem('lex_usuarioQuemado');
+    if (sUq) {
+      const parsed = JSON.parse(sUq);
+      if (parsed && parsed.correo) {
+        usuarioQuemado.correo = parsed.correo;
+        usuarioQuemado.contrasena = parsed.contrasena;
+      }
+    }
+
+    const sUa = localStorage.getItem('lex_usuarioActivo');
+    if (sUa) {
+      const parsed = JSON.parse(sUa);
+      if (parsed) {
+        usuarioActivo.secretaria = parsed.secretaria || usuarioActivo.secretaria;
+        usuarioActivo.correo = parsed.correo || usuarioActivo.correo;
+        usuarioActivo.apoderado = parsed.apoderado || usuarioActivo.apoderado;
+        usuarioActivo.telefono = parsed.telefono || usuarioActivo.telefono;
+      }
+    }
+  } catch (e) {
+    console.warn('No se pudo leer localStorage:', e);
+  }
+
+  // Actualizar UI
+  const contadorEl = document.getElementById('contador');
+  if (contadorEl) contadorEl.textContent = procesos;
+}
+
+// Cargar estado al arrancar
+loadState();
+
+function login() {
+  // Sin validación de usuario ni contraseña
+  document.getElementById('login').style.display = 'none';
+  document.getElementById('register').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'grid'; // Use grid here
+  document.querySelector('.top-bar').style.display = 'flex'; // Show top-bar
+}
+
+function mostrarRecuperacion() {
+  document.getElementById('login').style.display = 'none';
+  document.querySelector('.top-bar').style.display = 'none'; // Hide top-bar
+  // mostrar contenedor de recuperación (usa el mismo #register)
+  document.getElementById('register').style.display = 'flex';
+  // resetear contenido al estado inicial de recuperación
+  const box = document.getElementById('recoverBox');
+  if (box) {
+    box.innerHTML = `
+      <h2>Recuperar contraseña</h2>
+      <p>Ingrese su número de teléfono para recibir un código SMS y recuperar su contraseña.</p>
+      <input type="tel" id="telefonoRecuperacion" placeholder="Teléfono (ej. 3207096897)">
+      <button type="button" onclick="enviarCodigo()">Enviar código por SMS</button>
+      <button type="button" onclick="mostrarLogin()">Volver al inicio de sesión</button>
+    `;
+  }
+}
+
+function mostrarRegistro(user = null, index = -1) {
+  let title = user ? 'Editar Usuario' : 'Registro de Usuario';
+  let submitText = user ? 'Guardar cambios' : 'Registrarse';
+
+  document.getElementById('content').innerHTML = `
+    <div class="formulario">
+      <h2>${title}</h2>
+      <input type="hidden" id="reg_index" value="${index}">
+      <div class="form-section">
+        <div><label>Nombre</label><input type="text" id="reg_nombre" placeholder="Nombre" value="${user?.nombre || ''}"></div>
+        <div><label>Apellido</label><input type="text" id="reg_apellido" placeholder="Apellido" value="${user?.apellido || ''}"></div>
+        <div><label>Teléfono</label><input type="tel" id="reg_telefono" placeholder="Teléfono" value="${user?.telefono || ''}"></div>
+        <div><label>Correo</label><input type="email" id="reg_correo" placeholder="Correo electrónico" value="${user?.correo || ''}"></div>
+        <div><label>Tipo de documento</label>
+          <select id="reg_tipoDocumento">
+            <option value="CC" ${user?.tipoDocumento === 'CC' ? 'selected' : ''}>Cédula de Ciudadanía</option>
+            <option value="TI" ${user?.tipoDocumento === 'TI' ? 'selected' : ''}>Tarjeta de Identidad</option>
+            <option value="CE" ${user?.tipoDocumento === 'CE' ? 'selected' : ''}>Cédula de Extranjería</option>
+            <option value="PA" ${user?.tipoDocumento === 'PA' ? 'selected' : ''}>Pasaporte</option>
+            <option value="RC" ${user?.tipoDocumento === 'RC' ? 'selected' : ''}>Registro Civil</option>
+            <option value="NIT" ${user?.tipoDocumento === 'NIT' ? 'selected' : ''}>NIT</option>
+            <option value="OTRO" ${user?.tipoDocumento === 'OTRO' ? 'selected' : ''}>Otro</option>
+          </select>
+        </div>
+        <div><label>Documento</label><input type="text" id="reg_documento" placeholder="Documento (N°)" value="${user?.documento || ''}"></div>
+        <div><label>Secretaría</label>
+          <select id="reg_secretaria">
+            <option value="SECRETARÍA ADMINISTRATIVA" ${user?.secretaria === 'SECRETARÍA ADMINISTRATIVA' ? 'selected' : ''}>SECRETARÍA ADMINISTRATIVA</option>
+            <option value="SECRETARÍA DE EDUCACIÓN" ${user?.secretaria === 'SECRETARÍA DE EDUCACIÓN' ? 'selected' : ''}>SECRETARÍA DE EDUCACIÓN</option>
+            <option value="SECRETARÍA DE HACIENDA" ${user?.secretaria === 'SECRETARÍA DE HACIENDA' ? 'selected' : ''}>SECRETARÍA DE HACIENDA</option>
+            <option value="GESTIÓN DE RIESGO RISARALDA" ${user?.secretaria === 'GESTIÓN DE RIESGO RISARALDA' ? 'selected' : ''}>GESTIÓN DE RIESGO RISARALDA</option>
+            <option value="SECRETARÍA DE PLANEACIÓN" ${user?.secretaria === 'SECRETARÍA DE PLANEACIÓN' ? 'selected' : ''}>SECRETARÍA DE PLANEACIÓN</option>
+            <option value="SECRETARÍA DE SALUD" ${user?.secretaria === 'SECRETARÍA DE SALUD' ? 'selected' : ''}>SECRETARÍA DE SALUD</option>
+            <option value="SECRETARÍA DE INFRAESTRUCTURA" ${user?.secretaria === 'SECRETARÍA DE INFRAESTRUCTURA' ? 'selected' : ''}>SECRETARÍA DE INFRAESTRUCTURA</option>
+            <option value="SECRETARÍA DE DEPORTES, RECREACIÓN Y CULTURA" ${user?.secretaria === 'SECRETARÍA DE DEPORTES, RECREACIÓN Y CULTURA' ? 'selected' : ''}>SECRETARÍA DE DEPORTES, RECREACIÓN Y CULTURA</option>
+            <option value="SECRETARÍA JURÍDICA" ${user?.secretaria === 'SECRETARÍA JURÍDICA' ? 'selected' : ''}>SECRETARÍA JURÍDICA</option>
+            <option value="SECRETARÍA DE LA MUJER FAMILIA Y DESARROLLO SOCIAL" ${user?.secretaria === 'SECRETARÍA DE LA MUJER FAMILIA Y DESARROLLO SOCIAL' ? 'selected' : ''}>SECRETARÍA DE LA MUJER FAMILIA Y DESARROLLO SOCIAL</option>
+            <option value="OTROS" ${user?.secretaria === 'OTROS' ? 'selected' : ''}>OTROS</option>
+          </select>
+        </div>
+        <div><label>Contraseña</label><input type="password" id="reg_contrasena" placeholder="Contraseña" value="${user?.contrasena || ''}"></div>
+      </div>
+      <div class="form-buttons">
+        <button type="button" id="reg_submit" onclick="registrarUsuario()">${submitText}</button>
+        <button type="button" onclick="mostrarUsuario()">Cancelar</button>
+      </div>
+    </div>`;
+}
+
+function mostrarLogin() {
+  document.getElementById('register').style.display = 'none';
+  document.getElementById('login').style.display = 'flex';
+  document.querySelector('.top-bar').style.display = 'none'; // Hide top-bar
+}
+
+function volverInicio() {
+  // vuelve a la pantalla inicial (login)
+  document.getElementById('dashboard').style.display = 'none';
+  document.getElementById('register').style.display = 'none';
+  document.getElementById('login').style.display = 'flex';
+  document.querySelector('.top-bar').style.display = 'none'; // Hide top-bar
+}
+
+function toggleSubmenu() {
+  const submenu = document.getElementById('submenu');
+  submenu.style.display = submenu.style.display === 'block' ? 'none' : 'block';
+}
+
+function toggleSubmenuUsuario() {
+  const submenu = document.getElementById('submenuUsuario');
+  submenu.style.display = submenu.style.display === 'block' ? 'none' : 'block';
+}
+
+function mostrarResumenProcesos() {
+  const contentArea = document.getElementById('content');
+  let procesosHtml = `
+    <div class="formulario">
+      <h2>Resumen de Procesos (${listaProcesos.length} en total)</h2>
+  `;
+
+  if (listaProcesos.length === 0) {
+    procesosHtml += `<p>No hay procesos registrados aún.</p>`;
+  } else {
+    procesosHtml += `
+      <table style="width:100%; border-collapse: collapse; margin-top: 20px;">
+        <thead>
+          <tr style="background-color: #f2f2f2;">
+            <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">ID</th>
+            <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Radicado</th>
+            <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Demandante</th>
+            <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Demandado</th>
+            <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Estado</th>
+            <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Detalle</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+    listaProcesos.forEach((proceso, index) => {
+      procesosHtml += `
+        <tr>
+          <td style="padding: 8px; border: 1px solid #ddd;">${index + 1}</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">${proceso.radicado || 'N/A'}</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">${proceso.demandante || 'N/A'}</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">${proceso.demandado || 'N/A'}</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">
+            <select class="status-select" onchange="cambiarEstadoProceso(${index}, this.value)">
+              <option value="Activo" ${proceso.estado === 'Activo' ? 'selected' : ''}>Activo</option>
+              <option value="Archivado" ${proceso.estado === 'Archivado' ? 'selected' : ''}>Archivado</option>
+              <option value="Terminado" ${proceso.estado === 'Terminado' ? 'selected' : ''}>Terminado</option>
+            </select>
+          </td>
+          <td style="padding: 8px; border: 1px solid #ddd;">
+            <button onclick="mostrarDetalleProceso(${index})" style="background: none; border: none; cursor: pointer;" title="Ver Detalle">👁️</button>
+          </td>
+        </tr>
+      `;
+    });
+    procesosHtml += `
+        </tbody>
+      </table>
+    `;
+  }
+
+  procesosHtml += `
+      <div class="form-buttons" style="margin-top: 20px;">
+        <button onclick="volverInicioDashboard()">Volver al inicio</button>
+      </div>
+    </div>
+  `;
+  contentArea.innerHTML = procesosHtml;
+}
+
+function volverInicioDashboard() {
+  document.getElementById('content').innerHTML = `
+    <h2>Bienvenido a LexControl</h2>
+    <p>Seleccione una opción del menú para comenzar.</p>`;
+}
+
+function mostrarDetalleProceso(index) {
+  const proceso = listaProcesos[index];
+  if (!proceso) {
+    alert('Proceso no encontrado.');
+    return;
+  }
+
+  const contentArea = document.getElementById('content');
+  contentArea.innerHTML = `
+    <div class="formulario">
+      <h2>Detalle del Proceso</h2>
+      <div class="form-section">
+        <div><label>Secretaría de despacho</label><input type="text" value="${proceso.secretaria}" readonly></div>
+        <div><label>Calidad</label><input type="text" value="${proceso.calidad}" readonly></div>
+        <div><label>Radicado</label><input type="text" value="${proceso.radicado}" readonly></div>
+        <div><label>Nombre demandante</label><input type="text" value="${proceso.demandante}" readonly></div>
+        <div><label>Nombre demandado</label><input type="text" value="${proceso.demandado}" readonly></div>
+        <div><label>Número de cédula</label><input type="text" value="${proceso.cedula}" readonly></div>
+        <div><label>Fecha de notificación</label><input type="date" value="${proceso.fechaNotificacion}" readonly></div>
+        <div><label>Jurisdicción</label><input type="text" value="${proceso.jurisdiccion}" readonly></div>
+        <div><label>Acción judicial</label><input type="text" value="${proceso.accionJudicial}" readonly></div>
+        <div><label>Corporación o juzgado</label><input type="text" value="${proceso.corporacion}" readonly></div>
+        <div><label>Despacho judicial</label><input type="text" value="${proceso.despachoJudicial}" readonly></div>
+        <div><label>Dependencia responsable</label><input type="text" value="${proceso.dependenciaResponsable}" readonly></div>
+        <div><label>Apoderado</label><input type="text" value="${proceso.apoderado}" readonly></div>
+        <div><label>Teléfono</label><input type="text" value="${proceso.telefono}" readonly></div>
+        <div><label>Correo</label><input type="email" value="${proceso.correo}" readonly></div>
+        <div><label>Sintesis</label><textarea readonly>${proceso.sintesis}</textarea></div>
+        <div><label>Hecho generador</label><input type="text" value="${proceso.hechoGenerador}" readonly></div>
+        <div><label>Tipo de pretensiones</label><input type="text" value="${proceso.tipoPretensiones}" readonly></div>
+        <div><label>Valor medida cautelar</label><input type="number" value="${proceso.valorMedidaCautelar}" readonly></div>
+        <div><label>Medida cautelar</label><input type="text" value="${proceso.medidaCautelar}" readonly></div>
+        <div><label>Valor de la medida cautelar</label><input type="text" value="${proceso.valorCautelar}" readonly></div>
+        <div><label>Fortaleza de defensa</label><input type="text" value="${proceso.fortalezaDefensa}" readonly></div>
+        <div><label>Fortaleza probatoria</label><input type="text" value="${proceso.fortalezaProbatoria}" readonly></div>
+        <div><label>Riesgos procesales</label><input type="text" value="${proceso.riesgosProcesales}" readonly></div>
+        <div><label>Nivel jurisprudencial</label><input type="text" value="${proceso.nivelJurisprudencial}" readonly></div>
+        <div><label>Fecha probable del fallo</label><input type="date" value="${proceso.fechaFallo}" readonly></div>
+        <div><label>Estado</label><input type="text" value="${proceso.estado}" readonly></div>
+      </div>
+      <div class="form-buttons">
+        <button>PDF</button>
+        <button>Actuacion</button>
+        <button onclick="mostrarResumenProcesos()">Volver al resumen</button>
+        <button onclick="mostrarFormularioEdicionProceso(${index})">Editar</button>
+      </div>
+    </div>
+  `;
+}
+
+function mostrarFormularioEdicionProceso(index) {
+  const proceso = listaProcesos[index];
+  if (!proceso) {
+    alert('Proceso no encontrado.');
+    return;
+  }
+
+  const contentArea = document.getElementById('content');
+  contentArea.innerHTML = `
+    <div class="formulario">
+      <h2>Editar Proceso</h2>
+      <div class="form-section">
+        <div><label>Secretaría de despacho</label><input type="text" id="secretaria_edit" value="${proceso.secretaria}"></div>
+        <div><label>Calidad</label><input type="text" id="calidad_edit" value="${proceso.calidad}"></div>
+        <div><label>Radicado</label><input type="text" id="radicado_edit" value="${proceso.radicado}"></div>
+        <div><label>Nombre demandante</label><input type="text" id="nombreDemandante_edit" value="${proceso.demandante}"></div>
+        <div><label>Nombre demandado</label><input type="text" id="nombreDemandado_edit" value="${proceso.demandado}"></div>
+        <div><label>Número de cédula</label><input type="text" id="cedula_edit" value="${proceso.cedula}"></div>
+        <div><label>Fecha de notificación</label><input type="date" id="fechaNotificacion_edit" value="${proceso.fechaNotificacion}"></div>
+        <div><label>Jurisdicción</label><input type="text" id="jurisdiccion_edit" value="${proceso.jurisdiccion}"></div>
+        <div><label>Acción judicial</label><input type="text" id="accionJudicial_edit" value="${proceso.accionJudicial}"></div>
+        <div><label>Corporación o juzgado</label><input type="text" id="corporacion_edit" value="${proceso.corporacion}"></div>
+        <div><label>Despacho judicial</label><input type="text" id="despachoJudicial_edit" value="${proceso.despachoJudicial}"></div>
+        <div><label>Dependencia responsable</label><input type="text" id="dependenciaResponsable_edit" value="${proceso.dependenciaResponsable}"></div>
+        <div><label>Apoderado</label><input type="text" id="apoderado_edit" value="${proceso.apoderado}"></div>
+        <div><label>Teléfono</label><input type="text" id="telefono_edit" value="${proceso.telefono}"></div>
+        <div><label>Correo</label><input type="email" id="correo_edit" value="${proceso.correo}"></div>
+        <div><label>Sintesis</label><textarea id="sintesis_edit">${proceso.sintesis}</textarea></div>
+        <div><label>Hecho generador</label><input type="text" id="hechoGenerador_edit" value="${proceso.hechoGenerador}"></div>
+        <div><label>Tipo de pretensiones</label><input type="text" id="tipoPretensiones_edit" value="${proceso.tipoPretensiones}"></div>
+        <div><label>Valor medida cautelar</label><input type="number" id="valorMedidaCautelar_edit" value="${proceso.valorMedidaCautelar}"></div>
+        <div><label>Medida cautelar</label><input type="text" id="medidaCautelar_edit" value="${proceso.medidaCautelar}"></div>
+        <div><label>Valor de la medida cautelar</label><input type="text" id="valorCautelar_edit" value="${proceso.valorCautelar}"></div>
+        <div><label>Fortaleza de defensa</label><input type="text" id="fortalezaDefensa_edit" value="${proceso.fortalezaDefensa}"></div>
+        <div><label>Fortaleza probatoria</label><input type="text" id="fortalezaProbatoria_edit" value="${proceso.fortalezaProbatoria}"></div>
+        <div><label>Riesgos procesales</label><input type="text" id="riesgosProcesales_edit" value="${proceso.riesgosProcesales}"></div>
+        <div><label>Nivel jurisprudencial</label><input type="text" id="nivelJurisprudencial_edit" value="${proceso.nivelJurisprudencial}"></div>
+        <div><label>Fecha probable del fallo</label><input type="date" id="fechaFallo_edit" value="${proceso.fechaFallo}"></div>
+        <div><label>Estado</label><input type="text" id="estado_edit" value="${proceso.estado}"></div>
+      </div>
+      <div class="form-buttons">
+        <button onclick="guardarEdicionProceso(${index})">Guardar</button>
+        <button onclick="mostrarDetalleProceso(${index})">Cancelar</button>
+      </div>
+    </div>
+  `;
+}
+
+function guardarEdicionProceso(index) {
+  const proceso = listaProcesos[index];
+  if (!proceso) {
+    alert('Proceso no encontrado.');
+    return;
+  }
+
+  proceso.secretaria = document.getElementById('secretaria_edit').value;
+  proceso.calidad = document.getElementById('calidad_edit').value;
+  proceso.radicado = document.getElementById('radicado_edit').value;
+  proceso.demandante = document.getElementById('nombreDemandante_edit').value;
+  proceso.demandado = document.getElementById('nombreDemandado_edit').value;
+  proceso.cedula = document.getElementById('cedula_edit').value;
+  proceso.fechaNotificacion = document.getElementById('fechaNotificacion_edit').value;
+  proceso.jurisdiccion = document.getElementById('jurisdiccion_edit').value;
+  proceso.accionJudicial = document.getElementById('accionJudicial_edit').value;
+  proceso.corporacion = document.getElementById('corporacion_edit').value;
+  proceso.despachoJudicial = document.getElementById('despachoJudicial_edit').value;
+  proceso.dependenciaResponsable = document.getElementById('dependenciaResponsable_edit').value;
+  proceso.apoderado = document.getElementById('apoderado_edit').value;
+  proceso.telefono = document.getElementById('telefono_edit').value;
+  proceso.correo = document.getElementById('correo_edit').value;
+  proceso.sintesis = document.getElementById('sintesis_edit').value;
+  proceso.hechoGenerador = document.getElementById('hechoGenerador_edit').value;
+  proceso.tipoPretensiones = document.getElementById('tipoPretensiones_edit').value;
+  proceso.valorMedidaCautelar = document.getElementById('valorMedidaCautelar_edit').value;
+  proceso.medidaCautelar = document.getElementById('medidaCautelar_edit').value;
+  proceso.valorCautelar = document.getElementById('valorCautelar_edit').value;
+  proceso.fortalezaDefensa = document.getElementById('fortalezaDefensa_edit').value;
+  proceso.fortalezaProbatoria = document.getElementById('fortalezaProbatoria_edit').value;
+  proceso.riesgosProcesales = document.getElementById('riesgosProcesales_edit').value;
+  proceso.nivelJurisprudencial = document.getElementById('nivelJurisprudencial_edit').value;
+  proceso.fechaFallo = document.getElementById('fechaFallo_edit').value;
+  proceso.estado = document.getElementById('estado_edit').value;
+
+  saveState();
+  mostrarDetalleProceso(index);
+}
+
+function mostrarFormulario1() {
+  document.getElementById('content').innerHTML = `
+    <div class="formulario">
+      <div class="progress">
+        <span>Parte 1 de 2</span>
+        <div class="circle active"></div>
+        <div class="circle"></div>
+      </div>
+      <h2>Registro de Proceso</h2>
+      <div class="form-section">
+        <div><label>Secretaría de despacho</label><input type="text" id="secretaria" value="${usuarioActivo.secretaria}" readonly></div>
+        <div>
+          <label>Calidad</label>
+          <select id="calidad" onchange="actualizarCedulaLabel()">
+            <option value="demandante">Demandante</option>
+            <option value="demandado">Demandado</option>
+          </select>
+        </div>
+        <div><label>Radicado</label><input type="text" id="radicado"></div>
+        <div><label>Nombre demandante</label><input type="text" id="nombreDemandante"></div>
+        <div><label>Nombre demandado</label><input type="text" id="nombreDemandado"></div>
+        <div>
+          <label id="cedulaLabel">Número de cédula demandante</label>
+          <input type="text" id="cedula">
+        </div>
+        <div><label>Fecha de notificación</label><input type="date" id="fechaNotificacion"></div>
+
+        <div>
+          <label>Jurisdicción</label>
+          <select id="jurisdiccion" onchange="actualizarOpciones()">
+            <option value="">Seleccione</option>
+            <option value="civil">Jurisdicción Ordinaria – Civil</option>
+            <option value="laboral">Jurisdicción Ordinaria – Laboral</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Acción judicial</label>
+          <select id="accionJudicial">
+            <option value="">Seleccione una jurisdicción</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Corporación o juzgado</label>
+          <select id="coorporacion">
+            <option value="">Seleccione una jurisdicción</option>
+          </select>
+        </div>
+
+        <div><label>Despacho judicial</label><input type="text" id="despachoJudicial"></div>
+        <div><label>Dependencia responsable</label>
+          <select id="dependenciaResponsable">
+            <option value="">Seleccione</option>
+            <option value="SECRETARÍA ADMINISTRATIVA">SECRETARÍA ADMINISTRATIVA</option>
+            <option value="SECRETARÍA DE EDUCACIÓN">SECRETARÍA DE EDUCACIÓN</option>
+            <option value="SECRETARÍA DE HACIENDA">SECRETARÍA DE HACIENDA</option>
+            <option value="GESTIÓN DE RIESGO RISARALDA">GESTIÓN DE RIESGO RISARALDA</option>
+            <option value="SECRETARÍA DE PLANEACIÓN">SECRETARÍA DE PLANEACIÓN</option>
+            <option value="SECRETARÍA DE SALUD">SECRETARÍA DE SALUD</option>
+            <option value="SECRETARÍA DE INFRAESTRUCTURA">SECRETARÍA DE INFRAESTRUCTURA</option>
+            <option value="SECRETARÍA DE DEPORTES, RECREACIÓN Y CULTURA">SECRETARÍA DE DEPORTES, RECREACIÓN Y CULTURA</option>
+            <option value="SECRETARÍA JURÍDICA">SECRETARÍA JURÍDICA</option>
+            <option value="SECRETARÍA DE LA MUJER FAMILIA Y DESARROLLO SOCIAL">SECRETARÍA DE LA MUJER FAMILIA Y DESARROLLO SOCIAL</option>
+            <option value="OTROS">OTROS</option>
+          </select>
+        </div>
+        <div><label>Apoderado</label><input type="text" id="apoderado" value="${usuarioActivo.apoderado}" readonly></div>
+        <div><label>Teléfono</label><input type="text" id="telefono" value="${usuarioActivo.telefono}" readonly></div>
+        <div><label>Correo</label><input type="email" id="correo" value="${usuarioActivo.correo}" readonly></div>
+      </div>
+      <div class="form-buttons">
+        <button onclick="siguienteFormulario2()">Guardar y continuar</button>
+      </div>
+    </div>`;
+}
+
+function actualizarCedulaLabel() {
+  const calidad = document.getElementById("calidad").value;
+  const label = document.getElementById("cedulaLabel");
+  label.textContent = calidad === "demandante" ? 
+    "Número de cédula demandante" : 
+    "Número de cédula demandado";
+}
+
+function actualizarOpciones() {
+  const jurisdiccion = document.getElementById("jurisdiccion").value;
+  const accion = document.getElementById("accionJudicial");
+  const coorporacion = document.getElementById("coorporacion");
+
+  accion.innerHTML = "";
+  coorporacion.innerHTML = "";
+
+  if (jurisdiccion === "civil") {
+    accion.innerHTML = `
+      <option>Proceso Civil</option>
+      <option>Proceso declarativo (ordinario, abreviado, verbal, de mínima cuantía)</option>
+      <option>Proceso ejecutivo (para el cobro de obligaciones)</option>
+      <option>Proceso monitorio (para cobros pequeños, Ley 1564 de 2012)</option>
+      <option>Proceso de pertenencia (usucapión)</option>
+      <option>Proceso divisorio (partición de bienes comunes)</option>
+      <option>Proceso de restitución de inmueble arrendado</option>
+      <option>Proceso de rendición de cuentas</option>
+      <option>Acción reivindicatoria (recuperar un bien propio)</option>
+      <option>Acción de simulación</option>
+      <option>Acción de nulidad de contrato</option>
+      <option>Acción de responsabilidad civil contractual o extracontractual</option>
+    `;
+
+    coorporacion.innerHTML = `
+      <option>Despachos Civiles</option>
+      <option>Corte Suprema de Justicia – Sala de Casación Civil</option>
+      <option>Tribunales Superiores de Distrito Judicial – Salas Civiles</option>
+      <option>Juzgados Civiles del Circuito</option>
+      <option>Juzgados Civiles Municipales</option>
+      <option>Juzgados Civiles del Circuito Especializados en Restitución de Tierras</option>
+    `;
+  }
+
+  if (jurisdiccion === "laboral") {
+    accion.innerHTML = `
+      <option>Proceso Laboral y de la Seguridad Social</option>
+      <option>Proceso ordinario laboral</option>
+      <option>Proceso especial de fuero sindical</option>
+      <option>Proceso ejecutivo laboral</option>
+      <option>Proceso de seguridad social (pensiones, salud, riesgos laborales)</option>
+    `;
+
+    coorporacion.innerHTML = `
+      <option>Despachos Laborales</option>
+      <option>Corte Suprema de Justicia – Sala de Casación Laboral</option>
+      <option>Tribunales Superiores – Salas Laborales</option>
+      <option>Juzgados Laborales del Circuito</option>
+      <option>Juzgados de Pequeñas Causas Laborales (donde existan)</option>
+    `;
+  }
+}
+
+function siguienteFormulario2() {
+  currentProceso.secretaria = document.getElementById("secretaria").value;
+  currentProceso.calidad = document.getElementById("calidad").value;
+  currentProceso.radicado = document.getElementById("radicado").value;
+  currentProceso.nombreDemandante = document.getElementById("nombreDemandante").value;
+  currentProceso.nombreDemandado = document.getElementById("nombreDemandado").value;
+  currentProceso.cedula = document.getElementById("cedula").value;
+  currentProceso.fechaNotificacion = document.getElementById("fechaNotificacion").value;
+  currentProceso.jurisdiccion = document.getElementById("jurisdiccion").value;
+  currentProceso.accionJudicial = document.getElementById("accionJudicial").value;
+  currentProceso.corporacion = document.getElementById("coorporacion").value;
+  currentProceso.despachoJudicial = document.getElementById("despachoJudicial").value;
+  currentProceso.dependenciaResponsable = document.getElementById("dependenciaResponsable").value;
+  currentProceso.apoderado = document.getElementById("apoderado").value;
+  currentProceso.telefono = document.getElementById("telefono").value;
+  currentProceso.correo = document.getElementById("correo").value;
+  mostrarFormulario2();
+}
+
+function mostrarFormulario2() {
+  document.getElementById('content').innerHTML = `
+    <div class="formulario">
+      <div class="progress">
+        <span>Parte 2 de 2</span>
+        <div class="circle"></div>
+        <div class="circle active"></div>
+      </div>
+      <h2>Detalles del Proceso</h2>
+      <div class="form-section">
+        <div>
+          <label>Sintesis</label>
+          <textarea id="sintesis" placeholder="De qué trata la DDA"></textarea>
+        </div>
+
+        <div>
+          <label>Hecho generador</label>
+          <select id="hechoGenerador">
+            <option value="">Seleccione</option>
+            <option>Sanción moratoria por no consignación o pago de cesantías</option>
+            <option>Existencia relación laboral, pago de prestaciones sociales</option>
+            <option>Reconocimiento y pago homologación y nivelación salarial</option>
+            <option>Pensiones, reajuste pensional, retroactivo de liquidación, pensión sobreviviente, cuotas, partes personales</option>
+            <option>Pago bonificación zona de difícil acceso</option>
+            <option>Devolución de dinero por recaudo tributario de estampilla pro-desarrollo, de actos sujetos a registro en la Oficina de Registro de Instrumentos Públicos o en Cámara de Comercio y por cobro de impuesto vehículos oficiales</option>
+            <option>Falla médica</option>
+            <option>Accidente de tránsito por mal estado de las vías</option>
+            <option>Acciones Deslizamientos, afectaciones a predios y otros</option>
+            <option>Ajuste presupuestal de contratos. Pago de honorarios. Adjudicación.</option>
+            <option>Protección derechos medio ambiente y seguridad ciudadana.</option>
+            <option>Devolución y contratos de empréstito.</option>
+            </select>
+        </div>
+
+        <div>
+          <label>Tipo de pretensiones</label>
+          <select id="tipoPretensiones">
+            <option value="">Seleccione</option>
+            <option value="determinadas">Determinadas</option>
+            <option value="indeterminadas">Indeterminadas</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Valor medida cautelar</label>
+          <input type="number" id="valorMedidaCautelar" placeholder="Ingrese valor en números">
+        </div>
+
+        <div>
+          <label>Medida cautelar</label>
+          <select id="medidaCautelar" onchange="toggleValorCautelar()">
+            <option value="">Seleccione</option>
+            <option value="sí">Sí</option>
+            <option value="no">No</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Valor de la medida cautelar</label>
+          <input type="text" id="valorCautelar" placeholder="# o N/A">
+        </div>
+
+        <div>
+          <label>Fortaleza de defensa</label>
+          <select id="fortalezaDefensa">
+            <option value="">Seleccione</option>
+            <option>Alto</option>
+            <option>Medio Alto</option>
+            <option>Medio</option>
+            <option>Medio Bajo</option>
+            <option>Bajo</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Fortaleza probatoria</label>
+          <select id="fortalezaProbatoria">
+            <option value="">Seleccione</option>
+            <option>Alto</option>
+            <option>Medio Alto</option>
+            <option>Medio</option>
+            <option>Medio Bajo</option>
+            <option>Bajo</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Riesgos procesales</label>
+          <select id="riesgosProcesales">
+            <option value="">Seleccione</option>
+            <option>Alto</option>
+            <option>Medio Alto</option>
+            <option>Medio</option>
+            <option>Medio Bajo</option>
+            <option>Bajo</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Nivel jurisprudencial</label>
+          <select id="nivelJurisprudencial">
+            <option value="">Seleccione</option>
+            <option>Alto</option>
+            <option>Medio Alto</option>
+            <option>Medio</option>
+            <option>Medio Bajo</option>
+            <option>Bajo</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Fecha probable del fallo</label>
+          <input type="date" id="fechaFallo">
+        </div>
+      </div>
+
+      <div class="form-buttons">
+        <button onclick="mostrarFormulario1()">Volver</button>
+        <button onclick="guardarProceso()">Guardar</button>
+      </div>
+    </div>`;
+}
+
+function toggleValorCautelar() {
+  const medida = document.getElementById("medidaCautelar").value;
+  const valor = document.getElementById("valorCautelar");
+  valor.value = medida === "no" ? "N/A" : "";
+  valor.readOnly = medida === "no";
+}
+
+
+
+// Enviar código (simulado) por SMS
+function enviarCodigo() {
+  const telefono = document.getElementById('telefonoRecuperacion')?.value.trim();
+  if (!telefono) {
+    alert('Ingrese su número de teléfono.');
+    return;
+  }
+
+  // Generar código de 4 dígitos
+  recoveryCode = Math.floor(1000 + Math.random() * 9000).toString();
+  recoveryPhone = telefono;
+
+  // Simular envío (en producción llamar a API SMS)
+  alert('Se ha enviado un código por SMS al número: ' + telefono + '\n(Código simulado: ' + recoveryCode + ')');
+
+  // Mostrar formulario para ingresar código
+  const box = document.getElementById('recoverBox');
+  if (box) {
+    box.innerHTML = `
+      <h2>Verificar código</h2>
+      <p>Ingrese el código recibido por SMS en el número <strong>${telefono}</strong>.</p>
+      <input type="text" id="codigoRecibido" placeholder="Código de 4 dígitos">
+      <button type="button" onclick="verificarCodigo()">Verificar código</button>
+      <button type="button" onclick="mostrarLogin()">Cancelar</button>
+    `;
+  }
+}
+
+function verificarCodigo() {
+  const codigo = document.getElementById('codigoRecibido')?.value.trim();
+  if (!codigo) {
+    alert('Ingrese el código recibido.');
+    return;
+  }
+  if (codigo === recoveryCode) {
+    // mostrar formulario para establecer nueva contraseña
+    const box = document.getElementById('recoverBox');
+    if (box) {
+      box.innerHTML = `
+        <h2>Nueva contraseña</h2>
+        <p>Ingrese su nueva contraseña para el usuario asociado al teléfono <strong>${recoveryPhone}</strong>.</p>
+        <input type="password" id="nuevaContrasena" placeholder="Nueva contraseña">
+        <input type="password" id="nuevaContrasena2" placeholder="Confirmar nueva contraseña">
+        <button type="button" onclick="establecerNuevaContrasena()">Establecer contraseña</button>
+        <button type="button" onclick="mostrarLogin()">Cancelar</button>
+      `;
+    }
+  } else {
+    alert('Código incorrecto. Por favor verifique y vuelva a intentar.');
+  }
+}
+
+function establecerNuevaContrasena() {
+  const p1 = document.getElementById('nuevaContrasena')?.value || '';
+  const p2 = document.getElementById('nuevaContrasena2')?.value || '';
+  if (!p1 || !p2) {
+    alert('Complete ambos campos de contraseña.');
+    return;
+  }
+  if (p1 !== p2) {
+    alert('Las contraseñas no coinciden.');
+    return;
+  }
+
+  // En este demo actualizamos la contraseña del usuario quemado
+  usuarioQuemado.contrasena = p1;
+  // persistir nuevo password
+  saveState();
+  alert('Contraseña restablecida. Ahora puede iniciar sesión con su nueva contraseña.');
+  // limpiar datos de recuperación
+  recoveryCode = null;
+  recoveryPhone = null;
+  mostrarLogin();
+}
+
+// Mostrar datos de usuario en el área de contenido
+function mostrarUsuario() {
+  // Ocultar el formulario de registro si está visible (ya no es un modal, pero se mantiene por si acaso)
+
+  let items = users.map((u, idx) => `
+    <tr>
+      <td style="padding: 8px; border: 1px solid #ddd;">${u.nombre}</td>
+      <td style="padding: 8px; border: 1px solid #ddd;">${u.apellido}</td>
+      <td style="padding: 8px; border: 1px solid #ddd;">${u.correo}</td>
+      <td style="padding: 8px; border: 1px solid #ddd;">${u.telefono}</td>
+      <td style="padding: 8px; border: 1px solid #ddd;">${u.tipoDocumento}</td>
+      <td style="padding: 8px; border: 1px solid #ddd;">${u.documento}</td>
+      <td style="padding: 8px; border: 1px solid #ddd;">${u.secretaria}</td>
+      <td style="padding: 8px; border: 1px solid #ddd;">
+        <button onclick="editarUsuario(${idx})" class="btn-accion btn-edit" title="Editar">✏️</button>
+        <button onclick="eliminarUsuario(${idx})" class="btn-accion btn-delete" title="Eliminar">🗑️</button>
+      </td>
+    </tr>
+  `).join('');
+
+  document.getElementById('content').innerHTML = `
+    <div class="formulario">
+      <h2>Usuarios registrados</h2>
+      <div style="overflow-x: auto;">
+        <table style="width:100%; border-collapse: collapse; margin-top: 20px;">
+          <thead>
+            <tr style="background-color: #f2f2f2;">
+              <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Nombre</th>
+              <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Apellido</th>
+              <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Correo</th>
+              <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Teléfono</th>
+              <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Tipo Doc.</th>
+              <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Documento</th>
+              <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Secretaría</th>
+              <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${items}
+          </tbody>
+        </table>
+      </div>
+      <div class="form-buttons">
+        <button type="button" onclick="cerrarSesion()">Cerrar sesión</button>
+      </div>
+    </div>`;
+}
+
+function guardarPerfil() {
+  usuarioActivo.apoderado = document.getElementById('perfilNombre').value.trim();
+  usuarioActivo.apellido = document.getElementById('perfilApellido').value.trim();
+  usuarioActivo.correo = document.getElementById('perfilCorreo').value.trim();
+  usuarioActivo.telefono = document.getElementById('perfilTelefono').value.trim();
+  usuarioActivo.tipoDocumento = document.getElementById('perfilTipoDocumento').value;
+  usuarioActivo.documento = document.getElementById('perfilDocumento').value.trim();
+  usuarioActivo.secretaria = document.getElementById('perfilSecretaria').value;
+  // persistir cambios
+  saveState();
+  alert('Perfil guardado.');
+}
+
+function editarUsuario(index) {
+  const u = users[index];
+  if (!u) return alert('Usuario no encontrado');
+  // Mostrar formulario con datos para editar
+  mostrarRegistro(u, index);
+}
+
+function eliminarUsuario(index) {
+  if (!confirm('¿Eliminar este usuario? Esta acción no se puede deshacer.')) return;
+  users.splice(index, 1);
+  saveState();
+  mostrarUsuario();
+}
+
+function cerrarSesion() {
+  // limpia la sesión local y vuelve al login
+  document.getElementById('dashboard').style.display = 'none';
+  document.getElementById('login').style.display = 'flex';
+}
+
+// Registrar nuevo usuario (demo local)
+function registrarUsuario() {
+  const nombre = document.getElementById('reg_nombre').value.trim();
+  const apellido = document.getElementById('reg_apellido').value.trim();
+  const telefono = document.getElementById('reg_telefono').value.trim();
+  const correo = document.getElementById('reg_correo').value.trim();
+  const tipoDocumento = document.getElementById('reg_tipoDocumento').value;
+  const documento = document.getElementById('reg_documento').value.trim();
+  const secretaria = document.getElementById('reg_secretaria').value;
+  const contrasena = document.getElementById('reg_contrasena').value;
+  const idx = parseInt(document.getElementById('reg_index').value, 10);
+
+  if (!nombre || !apellido || !telefono || !correo || !tipoDocumento || !documento || !secretaria || !contrasena) {
+    alert('Por favor complete todos los campos.');
+    return;
+  }
+
+  if (!isNaN(idx) && idx >= 0 && idx < users.length) {
+    // Editar usuario existente
+    users[idx] = { nombre, apellido, telefono, correo, tipoDocumento, documento, secretaria, contrasena };
+    // Si el usuario quemado coincide con el correo antiguo, actualizar
+    usuarioQuemado.correo = correo;
+    usuarioQuemado.contrasena = contrasena;
+    saveState();
+    alert('Usuario actualizado.');
+  } else {
+    const nuevo = { nombre, apellido, telefono, correo, tipoDocumento, documento, secretaria, contrasena };
+    users.push(nuevo);
+    // Para permitir iniciar sesión con el nuevo usuario en este demo, actualizamos el usuario quemado
+    usuarioQuemado.correo = correo;
+    usuarioQuemado.contrasena = contrasena;
+    // Establecer usuario activo
+    usuarioActivo.apoderado = nombre + (apellido ? ' ' + apellido : '');
+    usuarioActivo.correo = correo;
+    usuarioActivo.telefono = telefono;
+    usuarioActivo.secretaria = secretaria;
+    saveState();
+    alert('Registro exitoso. Usuario agregado.');
+  }
+
+  // Ocultar formulario y mostrar lista
+  document.getElementById('registerForm').style.display = 'none';
+  mostrarUsuario();
+}
+
+function aplicarFiltro() {
+  const radicado = document.getElementById('filterRadicado').value.toLowerCase();
+  const demandado = document.getElementById('filterDemandado').value.toLowerCase();
+  const demandante = document.getElementById('filterDemandante').value.toLowerCase();
+
+  const filteredList = listaProcesos.filter(proceso => {
+    const matchRadicado = !radicado || (proceso.radicado && proceso.radicado.toLowerCase().includes(radicado));
+    const matchDemandado = !demandado || (proceso.demandado && proceso.demandado.toLowerCase().includes(demandado));
+    const matchDemandante = !demandante || (proceso.demandante && proceso.demandante.toLowerCase().includes(demandante));
+    return matchRadicado && matchDemandado && matchDemandante;
+  });
+
+  mostrarResumenProcesos(filteredList);
+}
+
+function limpiarFiltro() {
+  document.getElementById('filterRadicado').value = '';
+  document.getElementById('filterDemandado').value = '';
+  document.getElementById('filterDemandante').value = '';
+  mostrarResumenProcesos(); // Show all processes
+}
+
+function guardarProceso() {
+  // Capturar datos del formulario 2
+  const sintesis = document.getElementById("sintesis").value;
+  const hechoGenerador = document.getElementById("hechoGenerador").value;
+  const tipoPretensiones = document.getElementById("tipoPretensiones").value;
+  const valorMedidaCautelar = document.getElementById("valorMedidaCautelar").value;
+  const medidaCautelar = document.getElementById("medidaCautelar").value;
+  const valorCautelar = document.getElementById("valorCautelar").value;
+  const fortalezaDefensa = document.getElementById("fortalezaDefensa").value;
+  const fortalezaProbatoria = document.getElementById("fortalezaProbatoria").value;
+  const riesgosProcesales = document.getElementById("riesgosProcesales").value;
+  const nivelJurisprudencial = document.getElementById("nivelJurisprudencial").value;
+  const fechaFallo = document.getElementById("fechaFallo").value;
+
+  const nuevoProceso = {
+    ...currentProceso,
+    id: listaProcesos.length + 1,
+    sintesis,
+    hechoGenerador,
+    tipoPretensiones,
+    valorMedidaCautelar,
+    medidaCautelar,
+    valorCautelar,
+    fortalezaDefensa,
+    fortalezaProbatoria,
+    riesgosProcesales,
+    nivelJurisprudencial,
+    fechaFallo,
+    estado: "Activo" // Estado por defecto
+  };
+
+  listaProcesos.push(nuevoProceso);
+  procesos = listaProcesos.length;
+  document.getElementById('contador').textContent = procesos;
+  saveState();
+  alert('Proceso guardado. Total de procesos: ' + procesos);
+  // Volver al contenido principal
+  document.getElementById('content').innerHTML = `
+    <h2>Bienvenido a LexControl</h2>
+    <p>Seleccione una opción del menú para comenzar.</p>`;
+  
+  // Reset currentProceso
+  currentProceso = {};
+}
+
+function aplicarBusquedaGlobal() {
+  const searchTerm = document.getElementById('globalSearchInput').value.toLowerCase();
+
+  const filteredList = listaProcesos.filter(proceso => {
+    const matchRadicado = proceso.radicado && proceso.radicado.toLowerCase().includes(searchTerm);
+    const matchDemandado = proceso.demandado && proceso.demandado.toLowerCase().includes(searchTerm);
+    const matchDemandante = proceso.demandante && proceso.demandante.toLowerCase().includes(searchTerm);
+    return matchRadicado || matchDemandado || matchDemandante;
+  });
+
+  mostrarResumenProcesos(filteredList);
+}
+
+function cambiarEstadoProceso(index, nuevoEstado) {
+  if (index >= 0 && index < listaProcesos.length) {
+    listaProcesos[index].estado = nuevoEstado;
+    saveState();
+    mostrarResumenProcesos(); // Re-render the list to reflect changes
+    alert(`Estado del proceso ${listaProcesos[index].radicado} actualizado a ${nuevoEstado}`);
+  }
+}
+
+function toggleSubmenuReportes() {
+  const submenu = document.getElementById('submenuReportes');
+  submenu.style.display = submenu.style.display === 'block' ? 'none' : 'block';
+  // Display a default report when the main 'Reportes' button is clicked
+  mostrarReporteActivosFinalizados();
+}
+
+function mostrarReporteActivosFinalizados() {
+  // Mock historical data for demonstration
+  const mockHistoricalData = {
+    labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
+    activos: [5, 7, 6, 8, 9, 10],
+    finalizados: [2, 3, 4, 3, 5, 6]
+  };
+
+  document.getElementById('content').innerHTML = `
+    <div class="formulario">
+      <h2>Reporte: Procesos Activos vs Finalizados</h2>
+      <div style="width: 70%; margin: auto;">
+        <canvas id="activosFinalizadosChart"></canvas>
+      </div>
+    </div>`;
+
+  // Ensure the canvas is rendered before getting context
+  const ctx = document.getElementById('activosFinalizadosChart');
+  if (ctx) {
+    // Destroy existing chart instance if any
+    if (window.myActivosFinalizadosChart) {
+      window.myActivosFinalizadosChart.destroy();
+    }
+    window.myActivosFinalizadosChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: mockHistoricalData.labels,
+        datasets: [
+          {
+            label: 'Procesos Activos',
+            data: mockHistoricalData.activos,
+            borderColor: 'rgb(75, 192, 192)',
+            tension: 0.1,
+            fill: false
+          },
+          {
+            label: 'Procesos Finalizados',
+            data: mockHistoricalData.finalizados,
+            borderColor: 'rgb(255, 99, 132)',
+            tension: 0.1,
+            fill: false
+          }
+        ]
+      },
+      options: {
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        }
+      }
+    });
+    console.log('Line chart rendered.');
+  } else {
+    console.error('Canvas element activosFinalizadosChart not found.');
+  }
+}
+
+function mostrarReportePorTipo() {
+  const tipos = {};
+  listaProcesos.forEach(p => {
+    const tipo = p.accionJudicial || 'Desconocido';
+    tipos[tipo] = (tipos[tipo] || 0) + 1;
+  });
+
+  const labels = Object.keys(tipos);
+  const data = Object.values(tipos);
+
+  document.getElementById('content').innerHTML = `
+    <div class="formulario">
+      <h2>Reporte: Procesos por Tipo</h2>
+      <div style="width: 70%; margin: auto;">
+        <canvas id="procesosPorTipoChart"></canvas>
+      </div>
+    </div>`;
+
+  const ctx = document.getElementById('procesosPorTipoChart');
+  if (ctx) {
+    if (window.myProcesosPorTipoChart) {
+      window.myProcesosPorTipoChart.destroy();
+    }
+    window.myProcesosPorTipoChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Número de Procesos',
+          data: data,
+          backgroundColor: [
+            'rgba(255, 99, 132, 0.6)',
+            'rgba(54, 162, 235, 0.6)',
+            'rgba(255, 206, 86, 0.6)',
+            'rgba(75, 192, 192, 0.6)',
+            'rgba(153, 102, 255, 0.6)',
+            'rgba(255, 159, 64, 0.6)'
+          ],
+          borderColor: [
+            'rgba(255, 99, 132, 1)',
+            'rgba(54, 162, 235, 1)',
+            'rgba(255, 206, 86, 1)',
+            'rgba(75, 192, 192, 1)',
+            'rgba(153, 102, 255, 1)',
+            'rgba(255, 159, 64, 1)'
+          ],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        }
+      }
+    });
+    console.log('Bar chart rendered.');
+  } else {
+    console.error('Canvas element procesosPorTipoChart not found.');
+  }
+}
+
+function mostrarReportePorResponsable() {
+  const responsables = {};
+  listaProcesos.forEach(p => {
+    const responsable = p.dependenciaResponsable || 'Desconocido';
+    responsables[responsable] = (responsables[responsable] || 0) + 1;
+  });
+
+  const labels = Object.keys(responsables);
+  const data = Object.values(responsables);
+  const backgroundColors = [
+    '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40',
+    '#FFCD56', '#C9CBCF', '#7B68EE', '#3CB371', '#FFA07A'
+  ];
+
+  document.getElementById('content').innerHTML = `
+    <div class="formulario">
+      <h2>Reporte: Procesos por Responsable</h2>
+      <div style="width: 70%; margin: auto;">
+        <canvas id="procesosPorResponsableChart"></canvas>
+      </div>
+    </div>`;
+
+  const ctx = document.getElementById('procesosPorResponsableChart');
+  if (ctx) {
+    if (window.myProcesosPorResponsableChart) {
+      window.myProcesosPorResponsableChart.destroy();
+    }
+    window.myProcesosPorResponsableChart = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: labels,
+        datasets: [{
+          data: data,
+          backgroundColor: backgroundColors.slice(0, labels.length),
+          hoverOffset: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: 'top',
+          },
+          title: {
+            display: true,
+            text: 'Procesos por Responsable'
+          }
+        }
+      }
+    });
+    console.log('Doughnut chart rendered.');
+  } else {
+    console.error('Canvas element procesosPorResponsableChart not found.');
+  }
+}
+
+function mostrarReportePorMes() {
+  const meses = {};
+  listaProcesos.forEach(p => {
+    if (p.fechaNotificacion) {
+      const month = p.fechaNotificacion.substring(0, 7); // YYYY-MM
+      meses[month] = (meses[month] || 0) + 1;
+    }
+  });
+
+  const labels = Object.keys(meses).sort();
+  const data = labels.map(month => meses[month]);
+
+  document.getElementById('content').innerHTML = `
+    <div class="formulario">
+      <h2>Reporte: Procesos Registrados por Mes</h2>
+      <div style="width: 70%; margin: auto;">
+        <canvas id="procesosPorMesChart"></canvas>
+      </div>
+    </div>`;
+
+  const ctx = document.getElementById('procesosPorMesChart');
+  if (ctx) {
+    if (window.myProcesosPorMesChart) {
+      window.myProcesosPorMesChart.destroy();
+    }
+    window.myProcesosPorMesChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Número de Procesos',
+          data: data,
+          backgroundColor: 'rgba(153, 102, 255, 0.6)',
+          borderColor: 'rgba(153, 102, 255, 1)',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        }
+      }
+    });
+    console.log('Bar chart (by month) rendered.');
+  } else {
+    console.error('Canvas element procesosPorMesChart not found.');
+  }
+}
+
+// Custom Cursor Effect Logic
+const customCursor = document.getElementById('customCursor');
+const loginContainer = document.getElementById('login');
+
+document.addEventListener('mousemove', (e) => {
+  if (loginContainer && loginContainer.style.display !== 'none') {
+    customCursor.style.left = `${e.clientX}px`;
+    customCursor.style.top = `${e.clientY}px`;
+    customCursor.classList.add('active');
+  } else {
+    customCursor.classList.remove('active');
+  }
+});
+
+// Hide custom cursor when mouse leaves the window
+document.addEventListener('mouseleave', () => {
+  customCursor.classList.remove('active');
+});
+
+// Initial state: hide custom cursor if not on login
+if (loginContainer && loginContainer.style.display === 'none') {
+  customCursor.classList.remove('active');
+}
+
+</script>
+
+</body>
+</html>
