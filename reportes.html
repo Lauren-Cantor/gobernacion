@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestión de Procesos</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="dashboard">
+        <div class="sidebar">
+            <div class="logo-section">
+                <img src="logo.png" alt="Logo">
+                <h1>GOBERNACIÓN</h1>
+            </div>
+            <div class="menu-item">
+                <button>Reportes</button>
+            </div>
+        <div class="content">
+            <div id="reportes" class="module">
+                <h2>MÓDULO DE REPORTES</h2>
+        <div class="charts-grid">
+            <div class="chart-container">
+                <h3>PROCESOS ACTIVOS VS. FINALIZADOS</h3>
+                <canvas id="activeVsFinished"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3>PROCESOS POR TIPO</h3>
+                <canvas id="processByType"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3>PROCESOS POR RESPONSABLE</h3>
+                <canvas id="processByResponsible"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3>PROCESOS REGISTRADOS POR MES</h3>
+                <canvas id="processByMonth"></canvas>
+            </div>
+            </div>
+        </div>
+    </div>
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+    <script>
+        // Verificar que Chart.js se haya cargado correctamente
+        window.onload = function() {
+            console.log('Chart.js disponible:', typeof Chart !== 'undefined');
+            document.querySelector('.dashboard').style.display = 'flex';
+            initializeCharts();
+        };
+    </script>
+    <script src="js/charts.js"></script>
+</body>
+</html>

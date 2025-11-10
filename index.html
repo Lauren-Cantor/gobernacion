@@ -138,7 +138,8 @@
   .main-content-wrapper {
     display: flex;
     flex-direction: column;
-    overflow: hidden; /* Hide overflow from content */
+    overflow-y: auto; /* Allow main content to scroll */
+    overflow-x: hidden; /* Hide horizontal overflow */
   }
 
   .top-bar {
@@ -180,8 +181,14 @@
     color: white;
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
     padding: 20px;
-    overflow-y: auto; /* Allow sidebar to scroll if content is long */
+    height: 100vh; /* Full viewport height */
+  }
+
+  .menu-items-container {
+    flex-grow: 1;
+    overflow-y: auto;
   }
 
   .content {
@@ -256,12 +263,50 @@
 
   /* ===== FORMULARIOS ===== */
   .formulario {
+    position: relative; /* Needed for absolute positioning of the button */
     max-width: 800px;
     margin: 0 auto;
-    background: transparent; /* Make background transparent */
+    background-color: #fff; /* Make background white */
     padding: 30px;
     border-radius: 12px;
-    box-shadow: none; /* Remove shadow if background is transparent */
+    border: 1px solid #ccc; /* Add a border */
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1); /* Add a subtle shadow */
+  }
+
+  .btn-edit {
+    background-color: #2E5077;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+
+  .action-buttons-container {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    gap: 10px;
+  }
+
+  .btn-pdf {
+    background-color: #2E5077;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+
+  .btn-pdf:hover, .btn-edit:hover {
+    background-color: #1E3A5F;
+  }
+
+  .btn-delete {
+    background-color: #dc3545;
   }
 
   h2 {
@@ -318,7 +363,6 @@
     border-radius: 4px; /* Slightly smaller border-radius */
     cursor: pointer;
     display: inline-block; /* Ensure they are side-by-side */
-    margin: 0 2px; /* Small margin between buttons */
     font-size: 12px; /* Smaller font size for icons */
   }
 
@@ -433,12 +477,247 @@
   .custom-cursor.active {
     opacity: 1;
   }
+
+  /* ===== CALENDAR STYLES ===== */
+  .calendar-container {
+    width: 100%;
+    max-width: 600px;
+    margin: 20px auto;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    padding: 20px;
+  }
+
+  .calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .calendar-header button {
+    background-color: #2E5077;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+  }
+
+  .calendar-header button:hover {
+    background-color: #1E3A5F;
+  }
+
+  #currentMonthYear {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1E3A5F;
+  }
+
+  .calendar-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .calendar-table th,
+  .calendar-table td {
+    text-align: center;
+    padding: 10px;
+    border: 1px solid #eee;
+  }
+
+  .calendar-table th {
+    background-color: #f4f6f8;
+    color: #1E3A5F;
+    font-weight: 600;
+  }
+
+  .calendar-table td {
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+
+  .calendar-table td:hover {
+    background-color: #e0e6ed;
+  }
+
+  .calendar-table td.today {
+    background-color: #d1e7ff;
+    font-weight: 600;
+    color: #1E3A5F;
+  }
+
+  .calendar-table td.has-note {
+    background-color: #ffe0b2; /* Light orange to indicate a note */
+    position: relative;
+  }
+
+  .calendar-table td.has-note::after {
+    content: '📝'; /* Emoji for a note */
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    font-size: 10px;
+  }
+
+  /* ===== MODAL STYLES ===== */
+  .modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1000; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    justify-content: center;
+    align-items: center;
+  }
+
+  .modal-content {
+    background-color: #fefefe;
+    margin: auto;
+    padding: 20px;
+    border: 1px solid #888;
+    border-radius: 8px;
+    width: 80%;
+    max-width: 500px;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+    position: relative;
+  }
+
+  .close-button {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+  }
+
+  .close-button:hover,
+  .close-button:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .modal-content h3 {
+    color: #1E3A5F;
+    margin-bottom: 15px;
+  }
+
+  .modal-content textarea {
+    width: calc(100% - 20px);
+    height: 120px;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    resize: vertical;
+  }
+
+  .modal-content button {
+    background-color: #2E5077;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+
+  .modal-content button:hover {
+    background-color: #1E3A5F;
+  }
+
+  .modal-content .delete-button {
+    background-color: #dc3545;
+    margin-left: 10px;
+  }
+
+  .modal-content .delete-button:hover {
+    background-color: #c82333;
+  }
+
+  /* ===== NOTIFICATIONS STYLES ===== */
+  .notification-item {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-left: 5px solid #007bff; /* Default blue accent */
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    font-size: 15px;
+    color: #343a40;
+  }
+
+  .notification-item p {
+    margin: 0;
+    padding-left: 10px;
+  }
+
+  .notification-item.contract-expiring {
+    border-left-color: #ffc107; /* Yellow for warnings */
+  }
+
+  .notification-item.new-actuation {
+    border-left-color: #28a745; /* Green for new info */
+  }
+
+  .notification-item.upcoming-audiencia {
+    border-left-color: #17a2b8; /* Cyan for info/events */
+  }
+
+  .notification-item strong {
+    color: #0056b3;
+  }
+
+  .notification-card {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  }
+
+  .notification-card h3 {
+    color: #1E3A5F;
+    margin-top: 0;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+  }
+
+  /* Force black text for user manual content */
+  #manualDeUsuarioContainer h2,
+  #manualDeUsuarioContainer h3,
+  #manualDeUsuarioContainer p,
+  #manualDeUsuarioContainer li {
+    color: black !important;
+  }
 </style>
 </head>
 <body>
 
 <!-- Custom Cursor -->
 <div class="custom-cursor" id="customCursor"></div>
+
+<!-- Note Modal -->
+<div id="noteModal" class="modal">
+  <div class="modal-content">
+    <span class="close-button" onclick="closeNoteModal()">&times;</span>
+    <h3 id="noteDate"></h3>
+    <textarea id="noteInput" placeholder="Escribe tu nota aquí..."></textarea>
+    <button onclick="saveNote()">Guardar Nota</button>
+    <button onclick="deleteNote()" class="delete-button">Eliminar Nota</button>
+  </div>
+</div>
 
 <!-- ===== LOGIN ===== -->
 <div class="login-container" id="login">
@@ -447,66 +726,66 @@
     <input type="text" placeholder="Usuario" id="usuario">
     <input type="password" placeholder="Contraseña" id="password">
     <button type="button" onclick="login()">Iniciar sesión</button>
-    <button type="button" onclick="mostrarRecuperacion()">Recuperar contraseña</button>
   </div>
 </div>
-<!-- ===== RECUPERACIÓN (reutilizable) ===== -->
-<!-- ===== RECUPERACIÓN (reutilizable) ===== -->
-<div class="register-container" id="register" style="display: none;">
-  <div class="login-box" id="recoverBox">
-    <h2>Recuperar contraseña</h2>
-    <p>Ingrese su número de teléfono para recibir un código SMS y recuperar su contraseña.</p>
-    <input type="tel" id="telefonoRecuperacion" placeholder="Teléfono (ej. 3207096897)">
-    <button type="button" onclick="enviarCodigo()">Enviar código por SMS</button>
-    <button type="button" onclick="mostrarLogin()">Volver al inicio de sesión</button>
-  </div>
-</div>
-
 <!-- (Se elimina el formulario avanzado de registro; usamos el simple en #register) -->
 
 <!-- ===== DASHBOARD ===== -->
 <div class="dashboard" id="dashboard">
-  <div class="sidebar">
-    <div class="logo-section" onclick="volverInicio()">
-      <img src="logo.png" alt="LexControl Logo">
-      <h1>LexControl</h1>
-    </div>
+    <div class="sidebar">
+    <div class="menu-items-container">
+        <div class="logo-section" onclick="volverInicio()">
+          <img src="logo.png" alt="LexControl Logo">
+          <h1>LexControl</h1>
+        </div>
 
-    <div class="menu-item">
-      <button onclick="toggleSubmenu()">Procesos</button>
-      <div class="submenu" id="submenu">
-        <button onclick="mostrarResumenProcesos()">Resumen de Procesos</button>
-        <button onclick="mostrarFormulario1()">Crear nuevo proceso</button>
+        <div class="menu-item">
+          <button onclick="toggleSubmenu()">Procesos</button>
+          <div class="submenu" id="submenu">
+            <button onclick="mostrarResumenProcesos()">Resumen de Procesos</button>
+            <button onclick="mostrarFormulario1()">Crear nuevo proceso</button>
+          </div>
+        </div>
+
+        <div class="menu-item">
+          <button onclick="toggleSubmenuUsuario()">Usuario</button>
+          <div class="submenu" id="submenuUsuario">
+            <button onclick="mostrarUsuario()">Usuarios registrados</button>
+            <button onclick="mostrarRegistro() ">Crear nuevo usuario</button>
+          </div>
+        </div>
+
+        <div class="menu-item">
+          <button onclick="toggleSubmenuReportes()">Reporte</button>
+          <div class="submenu" id="submenuReportes">
+            <button onclick="mostrarReporteActivosFinalizados()">Reporte Procesos Activos vs Finalizados</button>
+            <button onclick="mostrarReportePorTipo()">Reporte Procesos por Tipo</button>
+            <button onclick="mostrarReportePorResponsable()">Reporte Procesos por Responsable</button>
+            <button onclick="mostrarReportePorMes()">Reporte Procesos Registrados por Mes</button>
+          </div>
+        </div>
+
+                <div class="menu-item">
+                  <button onclick="mostrarCalendario()">Calendario</button>
+                </div>
+                <div class="menu-item">
+                  <button onclick="mostrarNotificaciones()">Notificaciones</button>
+                </div>
+                <div class="menu-item">
+                  <button onclick="toggleSubmenuAyuda()">Ayuda</button>
+                  <div class="submenu" id="submenuAyuda">
+                    <button onclick="mostrarManualDeUsuario()">Manual de usuario</button>
+                  </div>
+                </div>    </div>
+      <div class="menu-item">
+        <button onclick="cerrarSesion()">Cerrar sesión</button>
       </div>
     </div>
-
-    <div class="menu-item">
-      <button onclick="toggleSubmenuUsuario()">Usuario</button>
-      <div class="submenu" id="submenuUsuario">
-        <button onclick="mostrarUsuario()">Usuarios registrados</button>
-        <button onclick="mostrarRegistro()">Crear nuevo usuario</button>
-      </div>
-    </div>
-
-    <div class="menu-item">
-      <button onclick="toggleSubmenuReportes()">Reportes</button>
-      <div class="submenu" id="submenuReportes">
-        <button onclick="mostrarReporteActivosFinalizados()">Reporte Procesos Activos vs Finalizados</button>
-        <button onclick="mostrarReportePorTipo()">Reporte Procesos por Tipo</button>
-        <button onclick="mostrarReportePorResponsable()">Reporte Procesos por Responsable</button>
-        <button onclick="mostrarReportePorMes()">Reporte Procesos Registrados por Mes</button>
-      </div>
-    </div>
-
-    <div class="menu-item" style="margin-top: auto;">
-      <button onclick="cerrarSesion()">Cerrar sesión</button>
-    </div>
-  </div>
 
   <div class="main-content-wrapper">
     <div class="top-bar">
       <input type="text" id="globalSearchInput" placeholder="Buscar por radicado, demandado o demandante...">
-      <button onclick="aplicarBusquedaGlobal()" title="Buscar">🔍</button>
+      <button onclick="aplicarBusquedaGlobal()">🔍</button>
     </div>
     <div class="content" id="content">
       <h2>Bienvenido a LexControl</h2>
@@ -548,6 +827,12 @@ let listaProcesos = [
     nivelJurisprudencial: "Alto",
     fechaFallo: "2025-06-01",
     estado: "En trámite",
+    fechaContratoFin: "2025-11-08", // Example contract end date (1 week from today)
+    actuaciones: [
+      { fecha: "2025-10-20", descripcion: "Presentación de demanda" },
+      { fecha: "2025-10-25", descripcion: "Admisión de la demanda" }
+    ],
+    fechaAudiencia: "2025-12-01"
   },
   {
     id: 2,
@@ -578,6 +863,11 @@ let listaProcesos = [
     nivelJurisprudencial: "Medio",
     fechaFallo: "2026-01-15",
     estado: "Archivado",
+    fechaContratoFin: "2026-01-01",
+    actuaciones: [
+      { fecha: "2024-03-01", descripcion: "Contestación de la demanda" }
+    ],
+    fechaAudiencia: "2025-11-10" // Example upcoming hearing date
   },
   {
     id: 3,
@@ -608,6 +898,11 @@ let listaProcesos = [
     nivelJurisprudencial: "Bajo",
     fechaFallo: "2024-12-01",
     estado: "Pendiente",
+    fechaContratoFin: "2025-12-15",
+    actuaciones: [
+      { fecha: "2023-04-01", descripcion: "Mandamiento de pago" }
+    ],
+    fechaAudiencia: "2025-11-05" // Example upcoming hearing date (today is Nov 1)
   },
   {
     id: 4,
@@ -638,6 +933,11 @@ let listaProcesos = [
     nivelJurisprudencial: "Alto",
     fechaFallo: "2025-03-10",
     estado: "Activo",
+    fechaContratoFin: "2025-11-01", // Example contract ending today
+    actuaciones: [
+      { fecha: "2023-05-01", descripcion: "Admisión de la demanda" }
+    ],
+    fechaAudiencia: "2025-12-20"
   },
   {
     id: 5,
@@ -668,6 +968,11 @@ let listaProcesos = [
     nivelJurisprudencial: "Medio Alto",
     fechaFallo: "2026-07-20",
     estado: "En trámite",
+    fechaContratoFin: "2026-07-13",
+    actuaciones: [
+      { fecha: "2024-02-01", descripcion: "Inspección judicial" }
+    ],
+    fechaAudiencia: "2025-11-03" // Example upcoming hearing date (in 2 days)
   },
   {
     id: 6,
@@ -698,6 +1003,11 @@ let listaProcesos = [
     nivelJurisprudencial: "Alto",
     fechaFallo: "2024-05-01",
     estado: "Terminado",
+    fechaContratoFin: "2024-04-24",
+    actuaciones: [
+      { fecha: "2023-03-01", descripcion: "Fallo de primera instancia" }
+    ],
+    fechaAudiencia: "2024-04-15"
   },
   {
     id: 7,
@@ -728,6 +1038,11 @@ let listaProcesos = [
     nivelJurisprudencial: "Medio Alto",
     fechaFallo: "2025-10-01",
     estado: "Activo",
+    fechaContratoFin: "2025-10-25",
+    actuaciones: [
+      { fecha: "2024-04-01", descripcion: "Auto que libra mandamiento ejecutivo" }
+    ],
+    fechaAudiencia: "2025-11-07" // Example upcoming hearing date (in 6 days)
   },
   {
     id: 8,
@@ -758,6 +1073,11 @@ let listaProcesos = [
     nivelJurisprudencial: "Medio",
     fechaFallo: "2026-03-01",
     estado: "Archivado",
+    fechaContratoFin: "2026-02-22",
+    actuaciones: [
+      { fecha: "2023-07-01", descripcion: "Contestación de la demanda" }
+    ],
+    fechaAudiencia: "2026-02-10"
   },
   {
     id: 9,
@@ -788,6 +1108,11 @@ let listaProcesos = [
     nivelJurisprudencial: "Alto",
     fechaFallo: "2025-11-15",
     estado: "Activo",
+    fechaContratoFin: "2025-11-08", // Example contract end date (1 week from today)
+    actuaciones: [
+      { fecha: "2024-05-01", descripcion: "Auto admisorio" }
+    ],
+    fechaAudiencia: "2025-11-08" // Example upcoming hearing date (1 week from today)
   },
   {
     id: 10,
@@ -818,7 +1143,48 @@ let listaProcesos = [
     nivelJurisprudencial: "Medio",
     fechaFallo: "2026-02-01",
     estado: "Activo",
+    fechaContratoFin: "2026-01-25",
+    actuaciones: [
+      { fecha: "2024-06-01", descripcion: "Audiencia de conciliación" }
+    ],
+    fechaAudiencia: "2025-12-05"
   },
+  {
+    id: 11,
+    secretaria: "SECRETARÍA JURÍDICA",
+    calidad: "demandado",
+    radicado: "11223-2024-01",
+    demandante: "Fernando Vargas",
+    demandado: "Gobernación de Risaralda",
+    cedula: "789789789",
+    fechaNotificacion: "2024-05-01",
+    jurisdiccion: "laboral",
+    accionJudicial: "Proceso ordinario laboral",
+    corporacion: "Tribunal Superior",
+    despachoJudicial: "Sala Laboral",
+    dependenciaResponsable: "Oficina Jurídica",
+    apoderado: "Lauren Cantor",
+    telefono: "3207096897",
+    correo: "lauren.cantorg@gmail.com",
+    sintesis: "Apelación de demanda por prestaciones sociales.",
+    hechoGenerador: "Pago de prestaciones sociales",
+    tipoPretensiones: "determinadas",
+    valorMedidaCautelar: 0,
+    medidaCautelar: "no",
+    valorCautelar: "N/A",
+    fortalezaDefensa: "Medio",
+    fortalezaProbatoria: "Medio",
+    riesgosProcesales: "Medio",
+    nivelJurisprudencial: "Medio",
+    fechaFallo: "2026-08-01",
+    estado: "Activo",
+    instancia: "Segunda Instancia",
+    fechaContratoFin: "2026-01-25",
+    actuaciones: [
+      { fecha: "2026-02-10", descripcion: "Presentación de recurso de apelación" }
+    ],
+    fechaAudiencia: "2026-06-05"
+  }
 ]; // Nuevo array para almacenar los procesos
 
 const users = [
@@ -830,6 +1196,7 @@ const users = [
     tipoDocumento: "CC",
     documento: "1000000000",
     secretaria: "SECRETARÍA ADMINISTRATIVA",
+    rol: "secretaria",
     contrasena: "12345",
   },
   {
@@ -840,6 +1207,9 @@ const users = [
     tipoDocumento: "CE",
     documento: "123456789",
     secretaria: "SECRETARÍA DE EDUCACIÓN",
+    rol: "contratista",
+    fechaInicioContrato: "2023-01-01",
+    fechaFinContrato: "2023-12-31",
     contrasena: "password",
   },
 ]; // Mock data for users
@@ -896,6 +1266,48 @@ function loadState() {
       saveState();
     }
 
+    // Ensure mock data for second instance exists
+    const hasSegundaInstancia = listaProcesos.some(p => p.instancia === 'Segunda Instancia');
+    if (!hasSegundaInstancia) {
+      listaProcesos.push({
+        id: listaProcesos.length + 1,
+        secretaria: "SECRETARÍA JURÍDICA",
+        calidad: "demandado",
+        radicado: "11223-2024-01",
+        demandante: "Fernando Vargas",
+        demandado: "Gobernación de Risaralda",
+        cedula: "789789789",
+        fechaNotificacion: "2024-05-01",
+        jurisdiccion: "laboral",
+        accionJudicial: "Proceso ordinario laboral",
+        corporacion: "Tribunal Superior",
+        despachoJudicial: "Sala Laboral",
+        dependenciaResponsable: "Oficina Jurídica",
+        apoderado: "Lauren Cantor",
+        telefono: "3207096897",
+        correo: "lauren.cantorg@gmail.com",
+        sintesis: "Apelación de demanda por prestaciones sociales.",
+        hechoGenerador: "Pago de prestaciones sociales",
+        tipoPretensiones: "determinadas",
+        valorMedidaCautelar: 0,
+        medidaCautelar: "no",
+        valorCautelar: "N/A",
+        fortalezaDefensa: "Medio",
+        fortalezaProbatoria: "Medio",
+        riesgosProcesales: "Medio",
+        nivelJurisprudencial: "Medio",
+        fechaFallo: "2026-08-01",
+        estado: "Activo",
+        instancia: "Segunda Instancia",
+        fechaContratoFin: "2026-01-25",
+        actuaciones: [
+          { fecha: "2026-02-10", descripcion: "Presentación de recurso de apelación" }
+        ],
+        fechaAudiencia: "2026-06-05"
+      });
+      saveState();
+    }
+
     // Update procesos count based on listaProcesos length
     procesos = listaProcesos.length;
 
@@ -938,24 +1350,6 @@ function login() {
   document.querySelector('.top-bar').style.display = 'flex'; // Show top-bar
 }
 
-function mostrarRecuperacion() {
-  document.getElementById('login').style.display = 'none';
-  document.querySelector('.top-bar').style.display = 'none'; // Hide top-bar
-  // mostrar contenedor de recuperación (usa el mismo #register)
-  document.getElementById('register').style.display = 'flex';
-  // resetear contenido al estado inicial de recuperación
-  const box = document.getElementById('recoverBox');
-  if (box) {
-    box.innerHTML = `
-      <h2>Recuperar contraseña</h2>
-      <p>Ingrese su número de teléfono para recibir un código SMS y recuperar su contraseña.</p>
-      <input type="tel" id="telefonoRecuperacion" placeholder="Teléfono (ej. 3207096897)">
-      <button type="button" onclick="enviarCodigo()">Enviar código por SMS</button>
-      <button type="button" onclick="mostrarLogin()">Volver al inicio de sesión</button>
-    `;
-  }
-}
-
 function mostrarRegistro(user = null, index = -1) {
   let title = user ? 'Editar Usuario' : 'Registro de Usuario';
   let submitText = user ? 'Guardar cambios' : 'Registrarse';
@@ -996,6 +1390,18 @@ function mostrarRegistro(user = null, index = -1) {
             <option value="OTROS" ${user?.secretaria === 'OTROS' ? 'selected' : ''}>OTROS</option>
           </select>
         </div>
+        <div><label>Rol</label>
+          <select id="reg_rol" onchange="handleRoleChange()">
+            <option value="secretaria" ${user?.rol === 'secretaria' ? 'selected' : ''}>Secretaria</option>
+            <option value="supervisor" ${user?.rol === 'supervisor' ? 'selected' : ''}>Supervisor</option>
+            <option value="contratista" ${user?.rol === 'contratista' ? 'selected' : ''}>Contratista</option>
+            <option value="funcionario" ${user?.rol === 'funcionario' ? 'selected' : ''}>Funcionario</option>
+          </select>
+        </div>
+        <div id="contratista-fields" style="display: none;">
+          <div><label>Fecha de inicio de contrato</label><input type="date" id="reg_fecha_inicio" value="${user?.fechaInicioContrato || ''}"></div>
+          <div><label>Fecha de fin de contrato</label><input type="date" id="reg_fecha_fin" value="${user?.fechaFinContrato || ''}"></div>
+        </div>
         <div><label>Contraseña</label><input type="password" id="reg_contrasena" placeholder="Contraseña" value="${user?.contrasena || ''}"></div>
       </div>
       <div class="form-buttons">
@@ -1003,6 +1409,16 @@ function mostrarRegistro(user = null, index = -1) {
         <button type="button" onclick="mostrarUsuario()">Cancelar</button>
       </div>
     </div>`;
+}
+
+function handleRoleChange() {
+  const rol = document.getElementById('reg_rol').value;
+  const contratistaFields = document.getElementById('contratista-fields');
+  if (rol === 'contratista') {
+    contratistaFields.style.display = 'grid';
+  } else {
+    contratistaFields.style.display = 'none';
+  }
 }
 
 function mostrarLogin() {
@@ -1031,13 +1447,21 @@ function toggleSubmenuUsuario() {
 
 function mostrarResumenProcesos() {
   const contentArea = document.getElementById('content');
+
+  const procesosPrimeraInstancia = listaProcesos.filter(p => p.instancia !== 'Segunda Instancia');
+  const procesosSegundaInstancia = listaProcesos.filter(p => p.instancia === 'Segunda Instancia');
+
   let procesosHtml = `
     <div class="formulario">
       <h2>Resumen de Procesos (${listaProcesos.length} en total)</h2>
   `;
 
-  if (listaProcesos.length === 0) {
-    procesosHtml += `<p>No hay procesos registrados aún.</p>`;
+  // Tabla para Procesos de Primera Instancia
+  procesosHtml += `
+    <h3>Procesos Primera Instancia (${procesosPrimeraInstancia.length})</h3>
+  `;
+  if (procesosPrimeraInstancia.length === 0) {
+    procesosHtml += `<p>No hay procesos de primera instancia registrados aún.</p>`;
   } else {
     procesosHtml += `
       <table style="width:100%; border-collapse: collapse; margin-top: 20px;">
@@ -1053,7 +1477,8 @@ function mostrarResumenProcesos() {
         </thead>
         <tbody>
     `;
-    listaProcesos.forEach((proceso, index) => {
+    procesosPrimeraInstancia.forEach((proceso) => {
+      const index = listaProcesos.indexOf(proceso);
       procesosHtml += `
         <tr>
           <td style="padding: 8px; border: 1px solid #ddd;">${index + 1}</td>
@@ -1068,7 +1493,55 @@ function mostrarResumenProcesos() {
             </select>
           </td>
           <td style="padding: 8px; border: 1px solid #ddd;">
-            <button onclick="mostrarDetalleProceso(${index})" style="background: none; border: none; cursor: pointer;" title="Ver Detalle">👁️</button>
+            <button onclick="mostrarDetalleProceso(${index})" style="background: none; border: none; cursor: pointer;">👁️</button>
+          </td>
+        </tr>
+      `;
+    });
+    procesosHtml += `
+        </tbody>
+      </table>
+    `;
+  }
+
+  // Tabla para Procesos de Segunda Instancia
+  procesosHtml += `
+    <h3 style="margin-top: 30px;">Procesos Segunda Instancia (${procesosSegundaInstancia.length})</h3>
+  `;
+  if (procesosSegundaInstancia.length === 0) {
+    procesosHtml += `<p>No hay procesos de segunda instancia registrados aún.</p>`;
+  } else {
+    procesosHtml += `
+      <table style="width:100%; border-collapse: collapse; margin-top: 20px;">
+        <thead>
+          <tr style="background-color: #f2f2f2;">
+            <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">ID</th>
+            <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Radicado</th>
+            <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Demandante</th>
+            <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Demandado</th>
+            <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Estado</th>
+            <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Detalle</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+    procesosSegundaInstancia.forEach((proceso) => {
+      const index = listaProcesos.indexOf(proceso);
+      procesosHtml += `
+        <tr>
+          <td style="padding: 8px; border: 1px solid #ddd;">${index + 1}</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">${proceso.radicado || 'N/A'}</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">${proceso.demandante || 'N/A'}</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">${proceso.demandado || 'N/A'}</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">
+            <select class="status-select" onchange="cambiarEstadoProceso(${index}, this.value)">
+              <option value="Activo" ${proceso.estado === 'Activo' ? 'selected' : ''}>Activo</option>
+              <option value="Archivado" ${proceso.estado === 'Archivado' ? 'selected' : ''}>Archivado</option>
+              <option value="Terminado" ${proceso.estado === 'Terminado' ? 'selected' : ''}>Terminado</option>
+            </select>
+          </td>
+          <td style="padding: 8px; border: 1px solid #ddd;">
+            <button onclick="mostrarDetalleProceso(${index})" style="background: none; border: none; cursor: pointer;">👁️</button>
           </td>
         </tr>
       `;
@@ -1101,9 +1574,13 @@ function mostrarDetalleProceso(index) {
     return;
   }
 
-  const contentArea = document.getElementById('content');
-  contentArea.innerHTML = `
+  let detalleHtml = `
     <div class="formulario">
+      <div class="action-buttons-container">
+        <button onclick="generarPdf(${index})" class="btn-pdf">📄</button>
+        <button onclick="agregarComentario(${index})" class="btn-edit">💬</button>
+        <button onclick="mostrarFormularioEdicionProceso(${index})" class="btn-edit">✏️</button>
+      </div>
       <h2>Detalle del Proceso</h2>
       <div class="form-section">
         <div><label>Secretaría de despacho</label><input type="text" value="${proceso.secretaria}" readonly></div>
@@ -1134,14 +1611,58 @@ function mostrarDetalleProceso(index) {
         <div><label>Fecha probable del fallo</label><input type="date" value="${proceso.fechaFallo}" readonly></div>
         <div><label>Estado</label><input type="text" value="${proceso.estado}" readonly></div>
       </div>
+  `;
+
+  if (proceso.instancia === 'Segunda Instancia') {
+    detalleHtml += `
+      <h3 style="text-align: center; color: #1E3A5F; margin-top: 20px;">Detalles de Segunda Instancia</h3>
+      <div class="form-section">
+        <div><label>Radicado (Segunda Instancia)</label><input type="text" value="${proceso.radicadoSegundaInstancia || 'N/A'}" readonly></div>
+        <div><label>Corporación o juzgado (Segunda Instancia)</label><input type="text" value="${proceso.corporacionSegundaInstancia || 'N/A'}" readonly></div>
+        <div><label>Etapa del proceso (Segunda Instancia)</label><input type="text" value="${proceso.etapaProcesoSegundaInstancia || 'N/A'}" readonly></div>
+        <div><label>Fallo segunda instancia</label><input type="text" value="${proceso.falloSegundaInstancia || 'N/A'}" readonly></div>
+        <div><label>Fecha de fallo segunda instancia</label><input type="date" value="${proceso.fechaFalloSegundaInstancia || ''}" readonly></div>
+        <div><label>Transcripción de la orden judicial</label><textarea readonly>${proceso.transcripcionOrdenJudicial || 'N/A'}</textarea></div>
+        <div><label>Costas</label><input type="text" value="${proceso.costas || 'N/A'}" readonly></div>
+        <div><label>Valor de costas</label><input type="number" value="${proceso.valorCostas || '0'}" readonly></div>
+        <div><label>Recurso</label><input type="text" value="${proceso.recurso || 'N/A'}" readonly></div>
+        <div><label>Tipo de recurso</label><input type="text" value="${proceso.tipoRecurso || 'N/A'}" readonly></div>
+        <div><label>RESOLUCIÓN DE PAGO DE SENTENCIA</label><input type="text" value="${proceso.resolucionPagoSentencia || 'N/A'}" readonly></div>
+        <div><label>Cumplimiento</label><input type="text" value="${proceso.cumplimiento || 'N/A'}" readonly></div>
+        <div><label>Estado final del proceso</label><input type="text" value="${proceso.estadoFinalProceso || 'N/A'}" readonly></div>
+      </div>
+    `;
+
+    if (proceso.resolucionPagoSentencia === 'Sí') {
+      detalleHtml += `
+        <h3 style="text-align: center; color: #1E3A5F; margin-top: 20px;">Documentos de Resolución de Pago de Sentencia</h3>
+        <div class="form-section">
+            <div><label>Cuenta de cobro por la parte demandante</label><input type="text" value="${proceso.doc_cuenta_cobro || 'N/A'}" readonly></div>
+            <div><label>Oficio de pago (Decreto 2469 de 2015)</label><input type="text" value="${proceso.doc_oficio_pago || 'N/A'}" readonly></div>
+            <div><label>Proyecto de resolución de orden de pago</label><input type="text" value="${proceso.doc_proyecto_resolucion || 'N/A'}" readonly></div>
+            <div><label>Documentos de la lista de chequeo</label><input type="text" value="${proceso.doc_lista_chequeo || 'N/A'}" readonly></div>
+            <div><label>Solicitud de Certificado de Disponibilidad Presupuestal</label><input type="text" value="${proceso.doc_solicitud_cdp || 'N/A'}" readonly></div>
+            <div><label>Certificado de Disponibilidad Presupuestal - CDP</label><input type="text" value="${proceso.doc_cdp || 'N/A'}" readonly></div>
+            <div><label>Cargue del SAIA para liquidación</label><input type="text" value="${proceso.doc_saia || 'N/A'}" readonly></div>
+            <div><label>Liquidación del proceso</label><input type="text" value="${proceso.doc_liquidacion || 'N/A'}" readonly></div>
+            <div><label>Resolución de orden de pago</label><input type="text" value="${proceso.doc_resolucion_pago || 'N/A'}" readonly></div>
+            <div><label>Solicitud de registro presupuestal</label><input type="text" value="${proceso.doc_solicitud_rp || 'N/A'}" readonly></div>
+            <div><label>Registro presupuestal</label><input type="text" value="${proceso.doc_rp || 'N/A'}" readonly></div>
+            <div><label>Elaborar solicitud de pago</label><input type="text" value="${proceso.doc_solicitud_pago || 'N/A'}" readonly></div>
+            <div><label>Soporte de pago exitoso por parte de Tesorería</label><input type="text" value="${proceso.doc_soporte_pago || 'N/A'}" readonly></div>
+        </div>
+      `;
+    }
+  }
+
+  detalleHtml += `
       <div class="form-buttons">
-        <button>PDF</button>
-        <button>Actuacion</button>
         <button onclick="mostrarResumenProcesos()">Volver al resumen</button>
-        <button onclick="mostrarFormularioEdicionProceso(${index})">Editar</button>
+        <button onclick="mostrarActuaciones(${index})">Actuaciones</button>
       </div>
     </div>
   `;
+  document.getElementById('content').innerHTML = detalleHtml;
 }
 
 function mostrarFormularioEdicionProceso(index) {
@@ -1235,11 +1756,12 @@ function mostrarFormulario1() {
   document.getElementById('content').innerHTML = `
     <div class="formulario">
       <div class="progress">
-        <span>Parte 1 de 2</span>
+        <span>Parte 1 de 3</span>
         <div class="circle active"></div>
         <div class="circle"></div>
+        <div class="circle"></div>
       </div>
-      <h2>Registro de Proceso</h2>
+      <h2>Registro de Proceso Primera Instancia</h2>
       <div class="form-section">
         <div><label>Secretaría de despacho</label><input type="text" id="secretaria" value="${usuarioActivo.secretaria}" readonly></div>
         <div>
@@ -1385,16 +1907,227 @@ function siguienteFormulario2() {
   currentProceso.apoderado = document.getElementById("apoderado").value;
   currentProceso.telefono = document.getElementById("telefono").value;
   currentProceso.correo = document.getElementById("correo").value;
+  currentProceso.instancia = "Primera Instancia";
   mostrarFormulario2();
 }
+
+function mostrarFormulario3() {
+  document.getElementById('content').innerHTML = `
+    <div class="formulario">
+      <div class="progress">
+        <span>Parte 3 de 3</span>
+        <div class="circle"></div>
+        <div class="circle"></div>
+        <div class="circle active"></div>
+      </div>
+      <h2>Detalles Adicionales del Proceso</h2>
+      <div class="form-section">
+        <div>
+          <label>Etapa del proceso</label>
+          <select id="etapaProceso">
+            <option value="">Seleccione</option>
+            <option>Demanda y anexos</option>
+            <option>Admición</option>
+            <option>Poder para actuar</option>
+            <option>Contestación</option>
+          </select>
+        </div>
+        <div>
+          <label>Fallo primera instancia</label>
+          <select id="falloPrimeraInstancia">
+            <option value="">Seleccione</option>
+            <option>Favorable</option>
+            <option>Desfavorable</option>
+          </select>
+        </div>
+        <div>
+          <label>Fecha de fallo</label>
+          <input type="date" id="fechaFalloInstancia">
+        </div>
+        <div>
+          <label>Apelación</label>
+          <select id="apelacion" onchange="toggleFechaApelacion(); toggleSegundaInstanciaForm();">
+            <option value="">Seleccione</option>
+            <option value="Sí">Sí</option>
+            <option value="No">No</option>
+          </select>
+        </div>
+        <div id="fechaApelacionContainer" style="display: none;">
+          <label>Fecha de apelación</label>
+          <input type="date" id="fechaApelacion">
+        </div>
+        <div>
+          <label>¿Apeló la contraparte?</label>
+          <select id="apeloContraparte" onchange="toggleSegundaInstanciaForm()">
+            <option value="">Seleccione</option>
+            <option value="Sí">Sí</option>
+            <option value="No">No</option>
+            <option value="No aplica">No aplica</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="segundaInstanciaForm" style="display: none; border-top: 1px solid #eee; padding-top: 20px; margin-top: 20px;">
+        <h3 style="text-align: center; color: #1E3A5F;">Segunda Instancia</h3>
+        <div class="form-section">
+          <div><label>Radicado (Segunda Instancia)</label><input type="text" id="radicadoSegundaInstancia" value="${currentProceso.radicado ? currentProceso.radicado.replace(/0$/, '1') : ''}" readonly></div>
+          <div>
+            <label>Corporación o juzgado (Segunda Instancia)</label>
+            <select id="corporacionSegundaInstancia">
+              <option value="">Seleccione una jurisdicción</option>
+              <option value="Despachos Civiles" ${currentProceso.corporacion === 'Despachos Civiles' ? 'selected' : ''}>Despachos Civiles</option>
+              <option value="Corte Suprema de Justicia – Sala de Casación Civil" ${currentProceso.corporacion === 'Corte Suprema de Justicia – Sala de Casación Civil' ? 'selected' : ''}>Corte Suprema de Justicia – Sala de Casación Civil</option>
+              <option value="Tribunales Superiores de Distrito Judicial – Salas Civiles" ${currentProceso.corporacion === 'Tribunales Superiores de Distrito Judicial – Salas Civiles' ? 'selected' : ''}>Tribunales Superiores de Distrito Judicial – Salas Civiles</option>
+              <option value="Juzgados Civiles del Circuito" ${currentProceso.corporacion === 'Juzgados Civiles del Circuito' ? 'selected' : ''}>Juzgados Civiles del Circuito</option>
+              <option value="Juzgados Civiles Municipales" ${currentProceso.corporacion === 'Juzgados Civiles Municipales' ? 'selected' : ''}>Juzgados Civiles Municipales</option>
+              <option value="Juzgados Civiles del Circuito Especializados en Restitución de Tierras" ${currentProceso.corporacion === 'Juzgados Civiles del Circuito Especializados en Restitución de Tierras' ? 'selected' : ''}>Juzgados Civiles del Circuito Especializados en Restitución de Tierras</option>
+              <option value="Despachos Laborales" ${currentProceso.corporacion === 'Despachos Laborales' ? 'selected' : ''}>Despachos Laborales</option>
+              <option value="Corte Suprema de Justicia – Sala de Casación Laboral" ${currentProceso.corporacion === 'Corte Suprema de Justicia – Sala de Casación Laboral' ? 'selected' : ''}>Corte Suprema de Justicia – Sala de Casación Laboral</option>
+              <option value="Tribunales Superiores – Salas Laborales" ${currentProceso.corporacion === 'Tribunales Superiores – Salas Laborales' ? 'selected' : ''}>Tribunales Superiores – Salas Laborales</option>
+              <option value="Juzgados Laborales del Circuito" ${currentProceso.corporacion === 'Juzgados Laborales del Circuito' ? 'selected' : ''}>Juzgados Laborales del Circuito</option>
+              <option value="Juzgados de Pequeñas Causas Laborales (donde existan)" ${currentProceso.corporacion === 'Juzgados de Pequeñas Causas Laborales (donde existan)' ? 'selected' : ''}>Juzgados de Pequeñas Causas Laborales (donde existan)</option>
+            </select>
+          </div>
+          <div>
+            <label>Etapa del proceso (Segunda Instancia)</label>
+            <select id="etapaProcesoSegundaInstancia">
+              <option value="">Seleccione</option>
+              <option>Interposición y concesión del recurso de apelación.</option>
+              <option>Remisión del expediente al superior.</option>
+              <option>Traslado a la contraparte.</option>
+              <option>Eventual práctica de pruebas.</option>
+              <option>Alegatos de conclusión.</option>
+              <option>Decisión o sentencia de segunda instancia.</option>
+              <option>Notificación y ejecución.</option>
+            </select>
+          </div>
+          <div>
+            <label>Fallo segunda instancia</label>
+            <select id="falloSegundaInstancia" onchange="toggleTerminoParaCumplirlo()">
+              <option value="">Seleccione</option>
+              <option>Favorable</option>
+              <option>Desfavorable</option>
+            </select>
+          </div>
+          <div id="terminoContainer" style="display: none;">
+            <label>Término para cumplirlo</label>
+            <select id="terminoTipo" onchange="toggleTerminoCantidad()">
+              <option value="">Seleccione</option>
+              <option value="Mes">Mes</option>
+              <option value="Años">Años</option>
+              <option value="No aplica">No aplica</option>
+            </select>
+          </div>
+          <div id="mesesContainer" style="display: none;">
+            <label>¿Cuántos meses?</label>
+            <input type="number" id="cantidadMeses" min="1" max="12">
+          </div>
+          <div id="anosContainer" style="display: none;">
+            <label>¿Cuántos años?</label>
+            <input type="number" id="cantidadAnos" min="1">
+          </div>
+          <div>
+           <label>Fecha de fallo segunda instancia</label>
+          <input type="date" id="fechaFalloInstancia">
+          </div>
+          <div>
+            <label>Transcripción de la orden judicial</label>
+            <textarea id="transcripcionOrdenJudicial" placeholder="Ingrese la transcripción aquí..."></textarea>
+          </div>
+          <div>
+            <label>Costas</label>
+            <select id="costas" onchange="toggleValorCostas()">
+              <option value="">Seleccione</option>
+              <option value="Sí">Sí</option>
+              <option value="No">No</option>
+            </select>
+          </div>
+          <div id="valorCostasContainer" style="display: none;">
+            <label>Valor de costas</label>
+            <input type="number" id="valorCostas" min="0">
+          </div>
+          <div>
+            <label>Recurso</label>
+            <select id="recurso" onchange="toggleTipoRecurso()">
+              <option value="">Seleccione</option>
+              <option value="Sí">Sí</option>
+              <option value="No">No</option>
+            </select>
+          </div>
+          <div id="tipoRecursoContainer" style="display: none;">
+            <label>Tipo de recurso</label>
+            <select id="tipoRecurso">
+              <option value="">Seleccione</option>
+              <option>Recurso de queja</option>
+              <option>Recurso de súplica</option>
+              <option>Modificación de la sentencia</option>
+              <option>Aclaración de la sentencia</option>
+              <option>Adición de la sentencia</option>
+            </select>
+          </div>
+          <div>
+            <label>RESOLUCIÓN DE PAGO DE SENTENCIA</label>
+            <select id="resolucionPagoSentencia" onchange="toggleResolucionPago()">
+                <option value="">Seleccione</option>
+                <option value="Sí">Sí</option>
+                <option value="No">No</option>
+            </select>
+          </div>
+          <div id="resolucionPagoChecklist" style="display: none; margin-top: 20px;">
+              <h4>Cargue de Documentos</h4>
+              <div class="form-section">
+                  <div><label>Cuenta de cobro por la parte demandante</label><input type="file" id="doc_cuenta_cobro"></div>
+                  <div><label>Oficio de pago (Decreto 2469 de 2015)</label><input type="file" id="doc_oficio_pago"></div>
+                  <div><label>Proyecto de resolución de orden de pago</label><input type="file" id="doc_proyecto_resolucion"></div>
+                  <div><label>Documentos de la lista de chequeo</label><input type="file" id="doc_lista_chequeo"></div>
+                  <div><label>Solicitud de Certificado de Disponibilidad Presupuestal</label><input type="file" id="doc_solicitud_cdp"></div>
+                  <div><label>Certificado de Disponibilidad Presupuestal - CDP</label><input type="file" id="doc_cdp"></div>
+                  <div><label>Cargue del SAIA para liquidación</label><input type="file" id="doc_saia"></div>
+                  <div><label>Liquidación del proceso</label><input type="file" id="doc_liquidacion"></div>
+                  <div><label>Resolución de orden de pago</label><input type="file" id="doc_resolucion_pago"></div>
+                  <div><label>Solicitud de registro presupuestal</label><input type="file" id="doc_solicitud_rp"></div>
+                  <div><label>Registro presupuestal</label><input type="file" id="doc_rp"></div>
+                  <div><label>Elaborar solicitud de pago</label><input type="file" id="doc_solicitud_pago"></div>
+                  <div><label>Soporte de pago exitoso por parte de Tesorería</label><input type="file" id="doc_soporte_pago"></div>
+              </div>
+          </div>
+          <div>
+            <label>Cumplimiento</label>
+            <select id="cumplimiento">
+              <option value="">Seleccione</option>
+              <option>TOTAL</option>
+              <option>PARCIAL</option>
+            </select>
+          </div>
+          <div>
+            <label>Estado final del proceso</label>
+            <select id="estadoFinalProceso">
+              <option value="">Seleccione</option>
+              <option>ARCHIVADO</option>
+              <option>TERMINADO</option>
+              <option>TERMINADO- PENDIENTE DE CUMPLIMIENTO</option>
+            </select>
+          </div>
+        </div>
+      </div>
+        
+                <div class="form-buttons">
+                  <button onclick="mostrarFormulario2()">Volver</button>
+                  <button onclick="guardarProceso()">Guardar</button>
+                </div>
+              </div>`;
+        }
+
+toggleValorCostas();
 
 function mostrarFormulario2() {
   document.getElementById('content').innerHTML = `
     <div class="formulario">
       <div class="progress">
-        <span>Parte 2 de 2</span>
+        <span>Parte 2 de 3</span>
         <div class="circle"></div>
         <div class="circle active"></div>
+        <div class="circle"></div>
       </div>
       <h2>Detalles del Proceso</h2>
       <div class="form-section">
@@ -1506,7 +2239,7 @@ function mostrarFormulario2() {
 
       <div class="form-buttons">
         <button onclick="mostrarFormulario1()">Volver</button>
-        <button onclick="guardarProceso()">Guardar</button>
+        <button onclick="mostrarFormulario3()">Guardar y continuar</button>
       </div>
     </div>`;
 }
@@ -1518,6 +2251,20 @@ function toggleValorCautelar() {
   valor.readOnly = medida === "no";
 }
 
+function generarPdf(index) {
+  alert('Generando PDF para el proceso ' + listaProcesos[index].radicado);
+  // Aquí iría la lógica para generar el PDF
+}
+
+function mostrarActuaciones(index) {
+  alert('Mostrando actuaciones de primera instancia para el proceso ' + listaProcesos[index].radicado);
+  // Aquí iría la lógica para mostrar las actuaciones
+}
+
+function agregarComentario(index) {
+  alert('Agregando comentario para el proceso primera instancia' + listaProcesos[index].radicado);
+  // Aquí iría la lógica para agregar un comentario
+}
 
 
 // Enviar código (simulado) por SMS
@@ -1595,6 +2342,76 @@ function establecerNuevaContrasena() {
   mostrarLogin();
 }
 
+function toggleFechaApelacion() {
+  const apelacionSelect = document.getElementById('apelacion');
+  const fechaApelacionContainer = document.getElementById('fechaApelacionContainer');
+  if (apelacionSelect.value === 'Sí') {
+    fechaApelacionContainer.style.display = 'block';
+  } else {
+    fechaApelacionContainer.style.display = 'none';
+  }
+}
+
+function toggleSegundaInstanciaForm() {
+  const apelacionSelect = document.getElementById('apelacion');
+  const apeloContraparteSelect = document.getElementById('apeloContraparte');
+  const segundaInstanciaForm = document.getElementById('segundaInstanciaForm');
+
+  if (apelacionSelect.value === 'Sí' || apeloContraparteSelect.value === 'Sí') {
+    segundaInstanciaForm.style.display = 'grid';
+  } else {
+    segundaInstanciaForm.style.display = 'none';
+  }
+}
+
+function toggleTerminoParaCumplirlo() {
+  const falloSelect = document.getElementById('falloSegundaInstancia');
+  const terminoContainer = document.getElementById('terminoContainer');
+  if (falloSelect.value === 'Desfavorable') {
+    terminoContainer.style.display = 'block';
+  } else {
+    terminoContainer.style.display = 'none';
+    // Also hide the quantity fields when the parent is hidden
+    document.getElementById('mesesContainer').style.display = 'none';
+    document.getElementById('anosContainer').style.display = 'none';
+  }
+}
+
+function toggleTerminoCantidad() {
+  const terminoSelect = document.getElementById('terminoTipo');
+  const mesesContainer = document.getElementById('mesesContainer');
+  const anosContainer = document.getElementById('anosContainer');
+
+  mesesContainer.style.display = 'none'; // Reset both
+  anosContainer.style.display = 'none';
+
+  if (terminoSelect.value === 'Mes') {
+    mesesContainer.style.display = 'block';
+  } else if (terminoSelect.value === 'Años') {
+    anosContainer.style.display = 'block';
+  }
+}
+
+function toggleValorCostas() {
+  const costasSelect = document.getElementById('costas');
+  const valorCostasContainer = document.getElementById('valorCostasContainer');
+  if (costasSelect.value === 'Sí') {
+    valorCostasContainer.style.display = 'block';
+  } else {
+    valorCostasContainer.style.display = 'none';
+  }
+}
+
+function toggleTipoRecurso() {
+  const recursoSelect = document.getElementById('recurso');
+  const tipoRecursoContainer = document.getElementById('tipoRecursoContainer');
+  if (recursoSelect.value === 'Sí') {
+    tipoRecursoContainer.style.display = 'block';
+  } else {
+    tipoRecursoContainer.style.display = 'none';
+  }
+}
+
 // Mostrar datos de usuario en el área de contenido
 function mostrarUsuario() {
   // Ocultar el formulario de registro si está visible (ya no es un modal, pero se mantiene por si acaso)
@@ -1608,9 +2425,10 @@ function mostrarUsuario() {
       <td style="padding: 8px; border: 1px solid #ddd;">${u.tipoDocumento}</td>
       <td style="padding: 8px; border: 1px solid #ddd;">${u.documento}</td>
       <td style="padding: 8px; border: 1px solid #ddd;">${u.secretaria}</td>
-      <td style="padding: 8px; border: 1px solid #ddd;">
-        <button onclick="editarUsuario(${idx})" class="btn-accion btn-edit" title="Editar">✏️</button>
-        <button onclick="eliminarUsuario(${idx})" class="btn-accion btn-delete" title="Eliminar">🗑️</button>
+      <td style="padding: 8px; border: 1px solid #ddd;">${u.rol || ''}</td>
+      <td style="padding: 8px; border: 1px solid #ddd; display: flex; gap: 5px; align-items: center;">
+        <button onclick="eliminarUsuario(${idx})" class="btn-accion btn-delete">🗑️</button>
+        <button onclick="editarUsuario(${idx})" class="btn-edit">✏️</button>
       </td>
     </tr>
   `).join('');
@@ -1629,6 +2447,7 @@ function mostrarUsuario() {
               <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Tipo Doc.</th>
               <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Documento</th>
               <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Secretaría</th>
+              <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Rol</th>
               <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Acciones</th>
             </tr>
           </thead>
@@ -1638,7 +2457,6 @@ function mostrarUsuario() {
         </table>
       </div>
       <div class="form-buttons">
-        <button type="button" onclick="cerrarSesion()">Cerrar sesión</button>
       </div>
     </div>`;
 }
@@ -1685,6 +2503,7 @@ function registrarUsuario() {
   const tipoDocumento = document.getElementById('reg_tipoDocumento').value;
   const documento = document.getElementById('reg_documento').value.trim();
   const secretaria = document.getElementById('reg_secretaria').value;
+  const rol = document.getElementById('reg_rol').value;
   const contrasena = document.getElementById('reg_contrasena').value;
   const idx = parseInt(document.getElementById('reg_index').value, 10);
 
@@ -1693,17 +2512,23 @@ function registrarUsuario() {
     return;
   }
 
+  const user = { nombre, apellido, telefono, correo, tipoDocumento, documento, secretaria, rol, contrasena };
+
+  if (rol === 'contratista') {
+    user.fechaInicioContrato = document.getElementById('reg_fecha_inicio').value;
+    user.fechaFinContrato = document.getElementById('reg_fecha_fin').value;
+  }
+
   if (!isNaN(idx) && idx >= 0 && idx < users.length) {
     // Editar usuario existente
-    users[idx] = { nombre, apellido, telefono, correo, tipoDocumento, documento, secretaria, contrasena };
+    users[idx] = user;
     // Si el usuario quemado coincide con el correo antiguo, actualizar
     usuarioQuemado.correo = correo;
     usuarioQuemado.contrasena = contrasena;
     saveState();
     alert('Usuario actualizado.');
   } else {
-    const nuevo = { nombre, apellido, telefono, correo, tipoDocumento, documento, secretaria, contrasena };
-    users.push(nuevo);
+    users.push(user);
     // Para permitir iniciar sesión con el nuevo usuario en este demo, actualizamos el usuario quemado
     usuarioQuemado.correo = correo;
     usuarioQuemado.contrasena = contrasena;
@@ -1757,6 +2582,44 @@ function guardarProceso() {
   const nivelJurisprudencial = document.getElementById("nivelJurisprudencial").value;
   const fechaFallo = document.getElementById("fechaFallo").value;
 
+  // Capturar datos de Segunda Instancia si el formulario está visible
+  const apelacionSelect = document.getElementById('apelacion');
+  const apeloContraparteSelect = document.getElementById('apeloContraparte');
+  let segundaInstanciaData = {};
+
+  if (apelacionSelect.value === 'Sí' || apeloContraparteSelect.value === 'Sí') {
+    segundaInstanciaData.radicadoSegundaInstancia = document.getElementById("radicadoSegundaInstancia").value;
+    segundaInstanciaData.corporacionSegundaInstancia = document.getElementById("corporacionSegundaInstancia").value;
+    segundaInstanciaData.etapaProcesoSegundaInstancia = document.getElementById("etapaProcesoSegundaInstancia").value;
+    segundaInstanciaData.falloSegundaInstancia = document.getElementById("falloSegundaInstancia").value;
+    segundaInstanciaData.fechaFalloSegundaInstancia = document.getElementById("fechaFalloInstancia").value;
+    segundaInstanciaData.transcripcionOrdenJudicial = document.getElementById("transcripcionOrdenJudicial").value;
+    segundaInstanciaData.costas = document.getElementById("costas").value;
+    segundaInstanciaData.valorCostas = document.getElementById("valorCostas").value;
+    segundaInstanciaData.recurso = document.getElementById("recurso").value;
+    segundaInstanciaData.tipoRecurso = document.getElementById("tipoRecurso").value;
+    segundaInstanciaData.cumplimiento = document.getElementById("cumplimiento").value;
+    segundaInstanciaData.estadoFinalProceso = document.getElementById("estadoFinalProceso").value;
+    currentProceso.instancia = 'Segunda Instancia'; // Change the instancia
+
+    segundaInstanciaData.resolucionPagoSentencia = document.getElementById("resolucionPagoSentencia").value;
+    if (segundaInstanciaData.resolucionPagoSentencia === 'Sí') {
+        segundaInstanciaData.doc_cuenta_cobro = document.getElementById('doc_cuenta_cobro').files[0]?.name || '';
+        segundaInstanciaData.doc_oficio_pago = document.getElementById('doc_oficio_pago').files[0]?.name || '';
+        segundaInstanciaData.doc_proyecto_resolucion = document.getElementById('doc_proyecto_resolucion').files[0]?.name || '';
+        segundaInstanciaData.doc_lista_chequeo = document.getElementById('doc_lista_chequeo').files[0]?.name || '';
+        segundaInstanciaData.doc_solicitud_cdp = document.getElementById('doc_solicitud_cdp').files[0]?.name || '';
+        segundaInstanciaData.doc_cdp = document.getElementById('doc_cdp').files[0]?.name || '';
+        segundaInstanciaData.doc_saia = document.getElementById('doc_saia').files[0]?.name || '';
+        segundaInstanciaData.doc_liquidacion = document.getElementById('doc_liquidacion').files[0]?.name || '';
+        segundaInstanciaData.doc_resolucion_pago = document.getElementById('doc_resolucion_pago').files[0]?.name || '';
+        segundaInstanciaData.doc_solicitud_rp = document.getElementById('doc_solicitud_rp').files[0]?.name || '';
+        segundaInstanciaData.doc_rp = document.getElementById('doc_rp').files[0]?.name || '';
+        segundaInstanciaData.doc_solicitud_pago = document.getElementById('doc_solicitud_pago').files[0]?.name || '';
+        segundaInstanciaData.doc_soporte_pago = document.getElementById('doc_soporte_pago').files[0]?.name || '';
+    }
+  }
+
   const nuevoProceso = {
     ...currentProceso,
     id: listaProcesos.length + 1,
@@ -1771,7 +2634,8 @@ function guardarProceso() {
     riesgosProcesales,
     nivelJurisprudencial,
     fechaFallo,
-    estado: "Activo" // Estado por defecto
+    estado: "Activo", // Estado por defecto
+    ...segundaInstanciaData // Add segunda instancia data
   };
 
   listaProcesos.push(nuevoProceso);
@@ -1788,8 +2652,15 @@ function guardarProceso() {
   currentProceso = {};
 }
 
+function toggleResolucionPago() {
+  const resolucionPago = document.getElementById('resolucionPagoSentencia').value;
+  const checklist = document.getElementById('resolucionPagoChecklist');
+  checklist.style.display = resolucionPago === 'Sí' ? 'block' : 'none';
+}
+
 function aplicarBusquedaGlobal() {
   const searchTerm = document.getElementById('globalSearchInput').value.toLowerCase();
+  console.log("Global search term:", searchTerm);
 
   const filteredList = listaProcesos.filter(proceso => {
     const matchRadicado = proceso.radicado && proceso.radicado.toLowerCase().includes(searchTerm);
@@ -1797,6 +2668,7 @@ function aplicarBusquedaGlobal() {
     const matchDemandante = proceso.demandante && proceso.demandante.toLowerCase().includes(searchTerm);
     return matchRadicado || matchDemandado || matchDemandante;
   });
+  console.log("Filtered processes:", filteredList);
 
   mostrarResumenProcesos(filteredList);
 }
@@ -1816,6 +2688,378 @@ function toggleSubmenuReportes() {
   // Display a default report when the main 'Reportes' button is clicked
   mostrarReporteActivosFinalizados();
 }
+
+function toggleSubmenuAyuda() {
+  const submenu = document.getElementById('submenuAyuda');
+  submenu.style.display = submenu.style.display === 'block' ? 'none' : 'block';
+}
+
+function mostrarManualDeUsuario() {
+  const contentArea = document.getElementById('content');
+  contentArea.innerHTML = `
+    <div id="manualDeUsuarioContainer" class="formulario" style="background-image: url('logo.png'); background-size: 50%; background-position: center; background-repeat: no-repeat; opacity: 0.3; filter: grayscale(100%);">
+      <h2>Manual de Usuario</h2>
+      <p>Bienvenido al manual de usuario de LexControl. Aquí encontrarás información sobre cómo utilizar la aplicación.</p>
+
+      <h3>Flujo del Proyecto</h3>
+      <p>El flujo principal del proyecto LexControl se puede resumir en los siguientes pasos:</p>
+      <ol>
+        <li><strong>Inicio de Sesión:</strong> Los usuarios acceden a la plataforma mediante sus credenciales.</li>
+        <li><strong>Dashboard Principal:</strong> Una vez autenticados, los usuarios son dirigidos a un panel principal donde pueden navegar por las diferentes funcionalidades.</li>
+        <li><strong>Gestión de Procesos:</strong>
+          <ul>
+            <li><strong>Creación de Nuevos Procesos:</strong> Registro de información detallada sobre nuevos procesos judiciales.</li>
+            <li><strong>Resumen y Detalle de Procesos:</strong> Visualización de un listado de todos los procesos registrados, con la opción de ver el detalle de cada uno.</li>
+            <li><strong>Edición de Procesos:</strong> Modificación de la información de procesos existentes.</li>
+            <li><strong>Generación de PDF:</strong> Creación de documentos PDF con el detalle de un proceso.</li>
+            <li><strong>Registro de Actuaciones:</strong> Adición de nuevas actuaciones o eventos relacionados con un proceso.</li>
+          </ul>
+        </li>
+        <li><strong>Gestión de Usuarios:</strong>
+          <ul>
+            <li><strong>Registro de Usuarios:</strong> Creación de nuevas cuentas de usuario.</li>
+            <li><strong>Visualización y Edición de Usuarios:</strong> Listado y modificación de los datos de los usuarios registrados.</li>
+            <li><strong>Eliminación de Usuarios:</strong> Baja de cuentas de usuario.</li>
+          </ul>
+        </li>
+        <li><strong>Reportes:</strong> Generación de diversos informes sobre los procesos, como:
+          <ul>
+            <li>Procesos Activos vs Finalizados.</li>
+            <li>Procesos por Tipo.</li>
+            <li>Procesos por Responsable.</li>
+            <li>Procesos Registrados por Mes.</li>
+          </ul>
+        </li>
+        <li><strong>Calendario:</strong> Visualización de un calendario interactivo donde los usuarios pueden añadir y gestionar notas para días específicos.</li>
+        <li><strong>Notificaciones:</strong> Recepción de alertas sobre:
+          <ul>
+            <li>Contratos próximos a terminar.</li>
+            <li>Actualizaciones recientes en actuaciones judiciales.</li>
+            <li>Próximas audiencias programadas.</li>
+          </ul>
+        </li>
+        <li><strong>Cerrar Sesión:</strong> Finalización de la sesión actual y retorno a la pantalla de inicio de sesión.</li>
+      </ol>
+
+      <h3>Cómo Usar el Calendario</h3>
+      <p>Para usar el calendario, navegue al módulo 'Calendario' desde el menú lateral. Haga clic en cualquier día para añadir o editar una nota. Las notas se guardan automáticamente.</p>
+
+      <h3>Cómo Usar las Notificaciones</h3>
+      <p>El módulo 'Notificaciones' le mantendrá informado sobre eventos importantes. Revise las tarjetas de 'Contratos próximos a terminar', 'Actualización de actuaciones' y 'Próxima audiencia' para estar al tanto de los procesos.</p>
+
+      <!-- Add more sections as needed -->
+
+    </div>`;
+}
+
+function mostrarCalendario() {
+  const contentArea = document.getElementById('content');
+  contentArea.innerHTML = `
+    <div class="formulario">
+      <h2>Calendario</h2>
+      <div id="calendar-container">
+        <div class="calendar-header">
+          <button onclick="changeMonth(-1)">Anterior</button>
+          <h3 id="currentMonthYear"></h3>
+          <button onclick="changeMonth(1)">Siguiente</button>
+        </div>
+        <table class="calendar-table">
+          <thead>
+            <tr>
+              <th>Dom</th><th>Lun</th><th>Mar</th><th>Mié</th><th>Jue</th><th>Vie</th><th>Sáb</th>
+            </tr>
+          </thead>
+          <tbody id="calendar-body">
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+
+  // Initialize calendar
+  currentDate = new Date();
+  renderCalendar(currentDate.getMonth(), currentDate.getFullYear());
+}
+
+let currentDate;
+
+function renderCalendar(month, year) {
+  const calendarBody = document.getElementById('calendar-body');
+  const currentMonthYearHeader = document.getElementById('currentMonthYear');
+
+  calendarBody.innerHTML = ''; // Clear previous days
+
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+  const daysInMonth = lastDay.getDate();
+
+  const dateString = firstDay.toLocaleDateString('es', { month: 'long', year: 'numeric' });
+  currentMonthYearHeader.textContent = dateString.charAt(0).toUpperCase() + dateString.slice(1);
+
+  let date = 1;
+  for (let i = 0; i < 6; i++) { // 6 weeks maximum
+    const row = document.createElement('tr');
+
+    for (let j = 0; j < 7; j++) { // 7 days a week
+      if (i === 0 && j < firstDay.getDay()) {
+        // Empty cells before the first day of the month
+        const cell = document.createElement('td');
+        row.appendChild(cell);
+      } else if (date > daysInMonth) {
+        // Empty cells after the last day of the month
+        break;
+      } else {
+        const cell = document.createElement('td');
+        cell.textContent = date;
+        if (date === currentDate.getDate() && month === new Date().getMonth() && year === new Date().getFullYear()) {
+          cell.classList.add('today');
+        }
+        row.appendChild(cell);
+        date++;
+      }
+    }
+    calendarBody.appendChild(row);
+  }
+}
+
+function changeMonth(delta) {
+  currentDate.setMonth(currentDate.getMonth() + delta);
+  renderCalendar(currentDate.getMonth(), currentDate.getFullYear());
+}
+
+let notes = {}; // Object to store notes
+let selectedDate = null; // To keep track of the date for which the note is being added/edited
+
+// Load notes from localStorage
+function loadNotes() {
+  const storedNotes = localStorage.getItem('calendarNotes');
+  if (storedNotes) {
+    notes = JSON.parse(storedNotes);
+  }
+}
+
+// Save notes to localStorage
+function saveNotes() {
+  localStorage.setItem('calendarNotes', JSON.stringify(notes));
+}
+
+// Open note modal
+function openNoteModal(date) {
+  selectedDate = date;
+  const dateString = date.toDateString();
+  document.getElementById('noteDate').textContent = `Nota para: ${dateString}`;
+  const noteInput = document.getElementById('noteInput');
+  noteInput.value = notes[dateString] || '';
+
+  const deleteButton = document.querySelector('.modal-content .delete-button');
+  if (notes[dateString]) {
+    deleteButton.style.display = 'inline-block'; // Show delete button if note exists
+  } else {
+    deleteButton.style.display = 'none'; // Hide delete button if no note
+  }
+
+  document.getElementById('noteModal').style.display = 'flex';
+}
+
+// Close note modal
+function closeNoteModal() {
+  document.getElementById('noteModal').style.display = 'none';
+  selectedDate = null;
+  renderCalendar(currentDate.getMonth(), currentDate.getFullYear()); // Re-render calendar to update indicators
+}
+
+// Save note
+function saveNote() {
+  if (selectedDate) {
+    const noteText = document.getElementById('noteInput').value.trim();
+    if (noteText) {
+      notes[selectedDate.toDateString()] = noteText;
+    } else {
+      delete notes[selectedDate.toDateString()]; // Remove note if empty
+    }
+    saveNotes();
+    closeNoteModal();
+  }
+}
+
+// Delete note
+function deleteNote() {
+  if (selectedDate && confirm('¿Estás seguro de que quieres eliminar esta nota?')) {
+    delete notes[selectedDate.toDateString()];
+    saveNotes();
+    closeNoteModal();
+  }
+}
+
+function mostrarNotificaciones() {
+  console.log("mostrarNotificaciones function called.");
+  const contentArea = document.getElementById('content');
+  let notificationsHtml = `
+    <div class="formulario">
+      <h2>Notificaciones</h2>
+      <div id="notifications-list">
+  `;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const oneWeekFromNow = new Date();
+  oneWeekFromNow.setDate(today.getDate() + 7);
+  oneWeekFromNow.setHours(23, 59, 59, 999);
+
+  let hasNotifications = false;
+
+  // Card for Actuaciones
+  notificationsHtml += `
+      <div class="notification-card">
+        <h3>Actuaciones</h3>
+        <div class="notification-item new-actuation">
+          <p>📄 Nueva actuación en el proceso <strong>2023-00123</strong>: Auto Admisorio de la Demanda (2025-11-04).</p>
+        </div>
+        <div class="notification-item new-actuation">
+          <p>📄 Nueva actuación en el proceso <strong>2024-00456</strong>: Notificación por Estado (2025-11-03).</p>
+        </div>
+      </div>
+    `;
+
+  // Card for Contract Expirations
+  let contractExpiringNotifications = '';
+  listaProcesos.forEach(proceso => {
+    if (proceso.fechaContratoFin) {
+      const contractEndDate = new Date(proceso.fechaContratoFin);
+      contractEndDate.setHours(0, 0, 0, 0);
+      if (contractEndDate >= today && contractEndDate <= oneWeekFromNow) {
+        contractExpiringNotifications += `
+          <div class="notification-item contract-expiring">
+            <p>🚨 El contrato del proceso <strong>${proceso.radicado}</strong> (Demandado: ${proceso.demandado}) vence el ${proceso.fechaContratoFin}.</p>
+          </div>
+        `;
+        hasNotifications = true;
+      }
+    }
+  });
+
+  if (contractExpiringNotifications) {
+    notificationsHtml += `
+      <div class="notification-card">
+        <h3>Contratos próximos a terminar</h3>
+        ${contractExpiringNotifications}
+      </div>
+    `;
+  }
+
+  // Card for New Actuaciones
+  let newActuationNotifications = '';
+  const twentyFourHoursAgo = new Date(today.getTime() - (24 * 60 * 60 * 1000));
+  listaProcesos.forEach(proceso => {
+    if (proceso.actuaciones && proceso.actuaciones.length > 0) {
+      proceso.actuaciones.forEach(actuacion => {
+        const actuationDate = new Date(actuacion.fecha);
+        if (actuationDate >= twentyFourHoursAgo) {
+          newActuationNotifications += `
+            <div class="notification-item new-actuation">
+              <p>✨ Nueva actuación en el proceso <strong>${proceso.radicado}</strong>: ${actuacion.descripcion} (${actuacion.fecha}).</p>
+            </div>
+          `;
+          hasNotifications = true;
+        }
+      });
+    }
+  });
+
+  if (newActuationNotifications) {
+    notificationsHtml += `
+      <div class="notification-card">
+        <h3>Actualización de actuaciones</h3>
+        ${newActuationNotifications}
+      </div>
+    `;
+  }
+
+  // Card for Upcoming Audiencias
+  let upcomingAudienciaNotifications = '';
+  listaProcesos.forEach(proceso => {
+    if (proceso.fechaAudiencia) {
+      const audienciaDate = new Date(proceso.fechaAudiencia);
+      audienciaDate.setHours(0, 0, 0, 0);
+      if (audienciaDate >= today && audienciaDate <= oneWeekFromNow) {
+        upcomingAudienciaNotifications += `
+          <div class="notification-item upcoming-audiencia">
+            <p>🗓️ Audiencia programada para el proceso <strong>${proceso.radicado}</strong> (Demandado: ${proceso.demandado}) el ${proceso.fechaAudiencia}.</p>
+          </div>
+        `;
+        hasNotifications = true;
+      }
+    }
+  });
+
+  if (upcomingAudienciaNotifications) {
+    notificationsHtml += `
+      <div class="notification-card">
+        <h3>Próxima audiencia</h3>
+        ${upcomingAudienciaNotifications}
+      </div>
+    `;
+  }
+
+  // Removed: if (!hasNotifications) { notificationsHtml += '<p>No hay notificaciones pendientes.</p>'; }
+
+  notificationsHtml += `
+      </div>
+    </div>
+  `;
+  contentArea.innerHTML = notificationsHtml;
+}
+
+// Modify renderCalendar to make days clickable
+function renderCalendar(month, year) {
+  const calendarBody = document.getElementById('calendar-body');
+  const currentMonthYearHeader = document.getElementById('currentMonthYear');
+
+  calendarBody.innerHTML = ''; // Clear previous days
+
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+  const daysInMonth = lastDay.getDate();
+
+  const dateString = firstDay.toLocaleDateString('es', { month: 'long', year: 'numeric' });
+  currentMonthYearHeader.textContent = dateString.charAt(0).toUpperCase() + dateString.slice(1);
+
+  let date = 1;
+  for (let i = 0; i < 6; i++) { // 6 weeks maximum
+    const row = document.createElement('tr');
+
+    for (let j = 0; j < 7; j++) { // 7 days a week
+      if (i === 0 && j < firstDay.getDay()) {
+        // Empty cells before the first day of the month
+        const cell = document.createElement('td');
+        row.appendChild(cell);
+      } else if (date > daysInMonth) {
+        // Empty cells after the last day of the month
+        break;
+      } else {
+        const cell = document.createElement('td');
+        const currentDayDate = new Date(year, month, date);
+        cell.textContent = date;
+        cell.onclick = () => openNoteModal(currentDayDate); // Make day clickable
+
+        if (date === new Date().getDate() && month === new Date().getMonth() && year === new Date().getFullYear()) {
+          cell.classList.add('today');
+        }
+        // Add a visual indicator if there's a note for this day
+        if (notes[currentDayDate.toDateString()]) {
+          cell.classList.add('has-note');
+        }
+
+        row.appendChild(cell);
+        date++;
+      }
+    }
+    calendarBody.appendChild(row);
+  }
+}
+
+// Initial load of notes
+loadNotes();
+
 
 function mostrarReporteActivosFinalizados() {
   // Mock historical data for demonstration
@@ -2013,7 +3257,6 @@ function mostrarReportePorMes() {
         <canvas id="procesosPorMesChart"></canvas>
       </div>
     </div>`;
-    
 
   const ctx = document.getElementById('procesosPorMesChart');
   if (ctx) {
